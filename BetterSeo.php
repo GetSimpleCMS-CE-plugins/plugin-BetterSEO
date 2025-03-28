@@ -72,6 +72,7 @@ function get_seoheader($full = true)
 			$desc = cleanHtml($desc, ['style', 'script']); // remove unwanted elements that strip_tags fails to remove
 			$desc = getExcerpt($desc, 160); // grab 160 chars
 			$desc = strip_whitespace($desc); // remove newlines, tab chars
+			$desc = str_replace('"', '', $desc); // remove double quotes
 			$desc = encode_quotes($desc);
 			$desc = trim($desc);
 			return $desc;
