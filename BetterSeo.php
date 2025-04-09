@@ -7,7 +7,7 @@ $thisfile = basename(__FILE__, ".php");
 register_plugin(
 	$thisfile, //Plugin id
 	'BetterSEO', 	//Plugin name
-	'3.0', 		//Plugin version
+	'3.1', 		//Plugin version
 	'Mateusz Skrzypczak',  //Plugin author
 	'https://paypal.me/multicol0r', //author website
 	'Make Get Simple CMS SEO better!', //Plugin description
