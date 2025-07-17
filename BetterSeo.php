@@ -6,10 +6,10 @@ $thisfile = basename(__FILE__, ".php");
 # register plugin
 register_plugin(
 	$thisfile, //Plugin id
-	'BetterSEO', 	//Plugin name
-	'3.1', 		//Plugin version
+	'BetterSEO',	 //Plugin name
+	'3.2',		 //Plugin version
 	'Mateusz Skrzypczak',  //Plugin author
-	'https://paypal.me/multicol0r', //author website
+	'https://getsimple-ce.ovh/donate', //author website
 	'Make Get Simple CMS SEO better!', //Plugin description
 	'plugins', //page type - on which admin tab to display
 	'betterSEO'  //main function (administration)
@@ -24,9 +24,8 @@ add_action('plugins-sidebar', 'createSideMenu', [$thisfile, 'BetterSEO Settings'
 
 function get_seoheader($full = true)
 {
-
 	///file
-	$folder = GSDATAOTHERPATH . '/betterSEO/';
+	$folder = GSDATAOTHERPATH . 'betterSEO/';
 	$geofile = $folder . 'geocheck.txt';
 	$geocodefile = $folder . 'geocode.txt';
 	$facebookcheckfile = $folder . 'facebookcheck.txt';
@@ -41,20 +40,21 @@ function get_seoheader($full = true)
 	$homepagetitlefile = $folder . 'homepagetitle.txt';
 
 	///
-	if (@file_get_contents($homepagetitlefile) === 'normal') {
+	$homepagetitle = file_exists($homepagetitlefile) ? file_get_contents($homepagetitlefile) : 'normal';
+	
+	if ($homepagetitle === 'normal') {
 		if (return_page_slug() == 'index') {
 			$newSeoTitle = get_page_title($echo = false) . ' | ' . get_site_name($echo = false);
 		} else {
 			$newSeoTitle = get_page_title($echo = false) . ' | ' . get_site_name($echo = false);
 		};
-	} elseif (@file_get_contents($homepagetitlefile) === 'titlefirst') {
+	} elseif ($homepagetitle === 'titlefirst') {
 		if (return_page_slug() == 'index') {
 			$newSeoTitle = get_site_name($echo = false) . ' | ' . get_page_title($echo = false);
 		} else {
 			$newSeoTitle = get_page_title($echo = false) . ' | ' . get_site_name($echo = false);
 		};
-	} elseif (@file_get_contents($homepagetitlefile) === 'titleonly') {
-
+	} elseif ($homepagetitle === 'titleonly') {
 		if (return_page_slug() == 'index') {
 			$newSeoTitle = get_site_name($echo = false);
 		} else {
@@ -95,33 +95,28 @@ function get_seoheader($full = true)
 		<link rel="canonical" href="' . get_page_url($echo = true) . '">
 		';
 
-	if (file_get_contents($geofile) !== '') {
+	if (file_exists($geofile) && file_get_contents($geofile) !== '') {
 		$seo .= '
 		<!-- GeoLocation Meta Tags / Geotagging. Used for custom results in Google. Generator here https://www.geo-tag.de/generator/en.html -->
-		' . @file_get_contents($geocodefile);
+		' . (file_exists($geocodefile) ? file_get_contents($geocodefile) : '');
+	}
 
-	};
-
-	if (file_get_contents($facebookcheckfile) !== '') {
-
+	if (file_exists($facebookcheckfile) && file_get_contents($facebookcheckfile) !== '') {
 		$imageseo = '';
 
+		if (file_exists($fbimagefile) && file_get_contents($fbimagefile) !== '') {
+			$imageseo = file_get_contents($fbimagefile);
+		}
 
-		if (@file_get_contents(	$fbimagefile) !== '') {
-			$imageseo = file_get_contents(	$fbimagefile);
-			
-		};
-
-		if (@file_get_contents($multifieldfile) !== '') {
+		if (file_exists($multifieldfile) && file_get_contents($multifieldfile) !== '') {
 			$content = file_get_contents($multifieldfile);
 			$imageseo = r_multifields($content);
+		}
 
-		};
-
-		if (@file_get_contents($fbcustomfile) !== '') {
+		if (file_exists($fbcustomfile) && file_get_contents($fbcustomfile) !== '') {
 			$content = file_get_contents($fbcustomfile);
 			$imageseo = return_custom_field($content);
-		};
+		}
 
 		$seo .= '
 		
@@ -131,30 +126,31 @@ function get_seoheader($full = true)
 		<meta property="og:site_name" content="' . get_site_name($echo = false) . '">
 		<meta property="og:title" content="' . $newSeoTitle . '">
 		<meta property="og:description" content="' . descSeo() . '">
-		<meta property="og:url" content="' . get_page_url($echo = true) . '">
-		<meta property="og:image" content="' . $imageseo . '">
+		<meta property="og:url" content="' . get_page_url($echo = true) . '">';
+		
+		if (!empty($imageseo)) {
+			$seo .= '<meta property="og:image" content="' . $imageseo . '">';
+		}
+		
+		$seo .= '
 		';
+	}
 
-	};
-
-	if (file_get_contents($dublincheckfile) !== '') {
-
+	if (file_exists($dublincheckfile) && file_get_contents($dublincheckfile) !== '') {
 		$seo .= '
 		<!-- Dublin Core Metadata Element Set
 		=================================================== -->
 		<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
 		<meta name="DC.Format" content="text/html" />
 		<meta name="DC.Type" content="article" />
-		<meta name="DC.Language" content="' . file_get_contents($dublinfile) . '" />
+		<meta name="DC.Language" content="' . (file_exists($dublinfile) ? file_get_contents($dublinfile) : '') . '" />
 		<meta name="DC.Title" content="' . get_page_clean_title($echo = false) . '" />
 		<meta name="DC.Creator" content="' . get_site_name($echo = false) . '"/>
 		<meta name="DC.Date" content="' . get_page_date('D, j M Y G:i:s', $echo = false) . ' GMT">
 		';
+	}
 
-	};
-
-	if (file_get_contents($faviconfile) !== '') {
-
+	if (file_exists($faviconfile) && file_get_contents($faviconfile) !== '') {
 		$seo .= '
 		<!-- Favicons. Generator here: https://www.favicon-generator.org/ 
 		=================================================== -->
@@ -192,8 +188,7 @@ function get_seoheader($full = true)
 		<link rel="manifest" href="' . get_theme_url($echo = false) . '/fav/manifest.json">
 		<meta name="theme-color" content="#ffffff">
 		';
-
-	};
+	}
 
 	echo $seo;
 
@@ -206,7 +201,7 @@ function get_seoheader($full = true)
 function betterSEO()
 {
 	///file
-	$folder = GSDATAOTHERPATH . '/betterSEO/';
+	$folder = GSDATAOTHERPATH . 'betterSEO/';
 	$geofile = $folder . 'geocheck.txt';
 	$geocodefile = $folder . 'geocode.txt';
 	$facebookcheckfile = $folder . 'facebookcheck.txt';
@@ -223,6 +218,7 @@ function betterSEO()
 
 	///
 	global $SITEURL;
+	global $USR;
 
 	$html = '
 		<style>
@@ -383,7 +379,7 @@ function betterSEO()
 					</div>
 				</label>
 
-				<textarea name="geocode" style="height:150px">' . @file_get_contents($geocodefile) . '</textarea>
+				<textarea name="geocode" style="height:150px">' . (file_exists($geocodefile) ? file_get_contents($geocodefile) : '') . '</textarea>
 				
 				<hr>
 				
@@ -398,16 +394,16 @@ function betterSEO()
 				</label>
 
 				<p>custom_field name (requires I18N Custom Fields plugin): </p>
-				<input type="text" name="fbcustom" value="' . @file_get_contents($fbcustomfile) . '" style="width:100%;padding:10px;box-sizing:border-box;"  >
+				<input type="text" name="fbcustom" value="' . (file_exists($fbcustomfile) ? file_get_contents($fbcustomfile) : '') . '" style="width:100%;padding:10px;box-sizing:border-box;"  >
 				
 				<br>
 
 				<p>multiField name (requires MultiField plugin): </p>
-				<input type="text" name="multifieldcustom" value="' . @file_get_contents($multifieldfile) . '" style="width:100%;padding:10px;box-sizing:border-box;"  >
+				<input type="text" name="multifieldcustom" value="' . (file_exists($multifieldfile) ? file_get_contents($multifieldfile) : '') . '" style="width:100%;padding:10px;box-sizing:border-box;"  >
 			 
 				
 				<p> or Static image:</p>
-				<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="fbimage" value="' . file_get_contents($fbimagefile) . '" placeholder="place url image">
+				<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="fbimage" value="' . (file_exists($fbimagefile) ? file_get_contents($fbimagefile) : '') . '" placeholder="place url image">
 				<button style="background: #000; color: #fff; border: none; padding: 10px 15px; cursor: pointer; border-radius: 2px; width: 20%; margin-top: 20px;" onclick="event.preventDefault();window.open(`' . $SITEURL . 'plugins/BetterSeo/files/imagebrowser.php?&func=multifield[]&count=0`,`myWindow`,`tolbar=no,scrollbars=no,menubar=no,width=500,height=500`)">Select Photo</button>
 
 				<br><hr><br>
@@ -423,7 +419,7 @@ function betterSEO()
 				</label>
 
 				<p>Lang. code:</p>
-				<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="dublin" placeholder="en" value="' . @file_get_contents($dublinfile) . '">
+				<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="dublin" placeholder="en" value="' . (file_exists($dublinfile) ? file_get_contents($dublinfile) : '') . '">
 
 				<hr>
 
@@ -484,63 +480,59 @@ function betterSEO()
 				document.querySelector(".tab-content-2").style.display="block";
 			});
 
-			if("' . @file_get_contents($homepagetitlefile) . '"!==""){
-				document.querySelector(".seoguy-select").value = "' . @file_get_contents($homepagetitlefile) . '"
+			if("' . (file_exists($homepagetitlefile) ? file_get_contents($homepagetitlefile) : '') . '"!==""){
+				document.querySelector(".seoguy-select").value = "' . (file_exists($homepagetitlefile) ? file_get_contents($homepagetitlefile) : '') . '"
 			}
 
-			if("' . @file_get_contents($geofile) . '"=="on"){
+			if("' . (file_exists($geofile) ? file_get_contents($geofile) : '') . '"=="on"){
 				document.querySelector(`input[name="geocheck"]`).checked = true;
 			}else{
 				document.querySelector(`input[name="geocheck"]`).checked = false;
 			}
 
-			if("' . @file_get_contents($facebookcheckfile) . '"=="on"){
+			if("' . (file_exists($facebookcheckfile) ? file_get_contents($facebookcheckfile) : '') . '"=="on"){
 				document.querySelector(`input[name="facebookcheck"]`).checked = true;
 			}else{
 				document.querySelector(`input[name="facebookcheck"]`).checked = false;
 			}
 
-			if("' . @file_get_contents($dublincheckfile) . '"=="on"){
+			if("' . (file_exists($dublincheckfile) ? file_get_contents($dublincheckfile) : '') . '"=="on"){
 				document.querySelector(`input[name="dublincheck"]`).checked = true;
 			}else{
 				document.querySelector(`input[name="dublincheck"]`).checked = false;
 			}
 
-			if("' . @file_get_contents($faviconfile) . '"=="on"){
+			if("' . (file_exists($faviconfile) ? file_get_contents($faviconfile) : '') . '"=="on"){
 				document.querySelector(`input[name="favicon"]`).checked = true;
 			}else{
 				document.querySelector(`input[name="favicon"]`).checked = false;
 			}
 		</script>
 		
-		<div style="padding:20px;text-align:center;box-sizing:border-box;background:#C21010;color:#fff;margin-top:20px;" id="paypal">
-			<p>If you want support my work, and you want to see new plugins:) </p>
-
-			<a href="https://www.paypal.com/donate/?hosted_button_id=TW6PXVCTM5A72">
-			<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"  />
-			</a>
-			<p style="margin:0;padding:0;margin-top:10px;">Special thanks for support and give me ideas for new plugins @Islander </p>
+		<div id="paypal" class="" style="padding-top:30px;">
+			<p>Made with <span class="credit-icon">❤️</span> especially for "<b>'.$USR.'</b>". Is this plugin useful to you?
+			 <a href="https://getsimple-ce.ovh/donate" target="_blank" class="donateButton">Buy Us A Coffee <svg xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-opacity="0" d="M17 14v4c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-4Z"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.5s" values="0;1"/></path><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="48" stroke-dashoffset="48" d="M17 9v9c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-9Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="48;0"/></path><path stroke-dasharray="14" stroke-dashoffset="14" d="M17 9h3c0.55 0 1 0.45 1 1v3c0 0.55 -0.45 1 -1 1h-3"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="14;0"/></path><mask id="lineMdCoffeeHalfEmptyFilledLoop0"><path stroke="#fff" d="M8 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M12 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M16 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4"><animateMotion calcMode="linear" dur="3s" path="M0 0v-8" repeatCount="indefinite"/></path></mask><rect width="24" height="0" y="7" fill="currentColor" mask="url(#lineMdCoffeeHalfEmptyFilledLoop0)"><animate fill="freeze" attributeName="y" begin="0.8s" dur="0.6s" values="7;2"/><animate fill="freeze" attributeName="height" begin="0.8s" dur="0.6s" values="0;5"/></rect></g></svg></a></p>
 		</div>
 		';
 
 	echo $html;
 
 	if (isset($_POST['submit'])) {
-		$geocheck = $_POST['geocheck'];
-		$geocode = $_POST['geocode'];
-		$facebookcheck = $_POST['facebookcheck'];
+		$geocheck = isset($_POST['geocheck']) ? 'on' : '';
+		$geocode = isset($_POST['geocode']) ? $_POST['geocode'] : '';
+		$facebookcheck = isset($_POST['facebookcheck']) ? 'on' : '';
 
-		$fbcustom = $_POST['fbcustom'];
-		$fbimage = $_POST['fbimage'];
-		$multifieldcustom = $_POST['multifieldcustom'];
-		$dublincheck = $_POST['dublincheck'];
-		$dublin = $_POST['dublin'];
-		$faviconcheck = $_POST['favicon'];
-		$homepagetitle = $_POST['homepagetitle'];
+		$fbcustom = isset($_POST['fbcustom']) ? $_POST['fbcustom'] : '';
+		$fbimage = isset($_POST['fbimage']) ? $_POST['fbimage'] : '';
+		$multifieldcustom = isset($_POST['multifieldcustom']) ? $_POST['multifieldcustom'] : '';
+		$dublincheck = isset($_POST['dublincheck']) ? 'on' : '';
+		$dublin = isset($_POST['dublin']) ? $_POST['dublin'] : '';
+		$faviconcheck = isset($_POST['favicon']) ? 'on' : '';
+		$homepagetitle = isset($_POST['homepagetitle']) ? $_POST['homepagetitle'] : 'normal';
 
 		// Set up the folder name and its permissions
 		// Note the constant GSDATAOTHERPATH, which points to /path/to/getsimple/data/other/
-		$folder = GSDATAOTHERPATH . '/betterSEO/';
+		$folder = GSDATAOTHERPATH . 'betterSEO/';
 		$geofile = $folder . 'geocheck.txt';
 		$geocodefile = $folder . 'geocode.txt';
 		$facebookcheckfile = $folder . 'facebookcheck.txt';
