@@ -187,6 +187,7 @@ function get_seoheader($full = true)
 		<meta name="msapplication-TileColor" content="#ffffff">
 		<link rel="manifest" href="' . get_theme_url($echo = false) . '/fav/manifest.json">
 		<meta name="theme-color" content="#ffffff">
+  
 		';
 	}
 
