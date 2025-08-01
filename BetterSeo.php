@@ -129,7 +129,8 @@ function get_seoheader($full = true)
 		<meta property="og:url" content="' . get_page_url($echo = true) . '">';
 		
 		if (!empty($imageseo)) {
-			$seo .= '<meta property="og:image" content="' . $imageseo . '">';
+			$seo .= '
+		<meta property="og:image" content="' . $imageseo . '">';
 		}
 		
 		$seo .= '
