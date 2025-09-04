@@ -1039,7 +1039,8 @@ function betterSEO()
 			<h4 class="w3-margin-top w3-margin-bottom">Whats New:</h4>
 			<p>
 				<b>v3.4</b><br>
-				JSON-LD improvements
+				JSON-LD improvements<br>
+				minor fixes
 			</p>
 			<p>
 				<b>v3.3</b><br>
