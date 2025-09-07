@@ -7,7 +7,7 @@ $thisfile = basename(__FILE__, ".php");
 register_plugin(
 	$thisfile, 		//Plugin id
 	'BetterSEO',	//Plugin name
-	'3.4', 			//Plugin version
+	'3.5', 			//Plugin version
 	'CE Team', 		//Plugin author
 	'https://getsimple-ce.ovh/donate', //author website
 	'Make Get Simple CMS SEO better!', //Plugin description
@@ -381,20 +381,27 @@ $jsonldOutput .= ',
   "priceRange": "' . $jsonldData['priceRange'] . '"';
 		}
 		
-		// Handle opening hours
-		if (isset($jsonldData['openingHours']) && is_array($jsonldData['openingHours'])) {
+		// Handle opening hours specification
+		if (isset($jsonldData['openingHoursSpecification']) && is_array($jsonldData['openingHoursSpecification'])) {
 			$jsonldOutput .= ',
-  "openingHours": [';
+  "openingHoursSpecification": [';
 			
-			$hoursCount = count($jsonldData['openingHours']);
-			foreach ($jsonldData['openingHours'] as $index => $hour) {
-				$jsonldOutput .= '"' . $hour . '"';
-				if ($index < $hoursCount - 1) {
+			$specCount = count($jsonldData['openingHoursSpecification']);
+			foreach ($jsonldData['openingHoursSpecification'] as $index => $spec) {
+				$jsonldOutput .= '
+	{
+	  "@type": "OpeningHoursSpecification",
+	  "dayOfWeek": ["' . $spec['dayOfWeek'][0] . '"],
+	  "opens": "' . $spec['opens'] . '",
+	  "closes": "' . $spec['closes'] . '"
+	}';
+				if ($index < $specCount - 1) {
 					$jsonldOutput .= ',';
 				}
 			}
 			
-			$jsonldOutput .= ']';
+			$jsonldOutput .= '
+  ]';
 		}
 		
 		// Close the JSON object
@@ -621,6 +628,29 @@ function betterSEO()
 				width: 100%;
 				padding: 5px;
 				border: 1px solid #ddd;
+			}
+			.time-slot {
+				border: 1px solid #ddd;
+				padding: 10px;
+				margin-bottom: 10px;
+				border-radius: 5px;
+				background: #f9f9f9;
+			}
+			.time-row {
+				display: flex;
+				gap: 10px;
+				align-items: flex-end;
+			}
+			.time-col {
+				flex: 1;
+			}
+			.time-col:last-child {
+				flex: 0 0 auto;
+			}
+			.time-col label {
+				display: block;
+				margin-bottom: 5px;
+				font-size: 0.8rem;
 			}
 			#jsonld-div input {color:blue}
 		</style>
@@ -1027,6 +1057,8 @@ function betterSEO()
 			<h4 class="w3-margin-top w3-margin-bottom">Installation:</h4>
 			<p>In your theme\'s header, replace: <span class="tpl">&lt;?php get_header(); ?></span> with: <span class="tpl">&lt;?php get_seoheader(); ?></span></p>
 			
+			<hr>
+			
 			<h4 class="w3-margin-top w3-margin-bottom">Info:</h4>
 			<ul>
 				<li><a href="https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data" target="_blank">Google Structured Data</a></li>
@@ -1036,10 +1068,17 @@ function betterSEO()
 				<li><a href="https://www.favicon-generator.org/" target="_blank">Favicon Generator</a></li>
 			</ul>
 			
+			<hr>
+			
 			<h4 class="w3-margin-top w3-margin-bottom">Whats New:</h4>
 			<p>
+				<b>v3.5</b><br>
+				add split hour option in JSON-LD
+			</p>
+			<p>
 				<b>v3.4</b><br>
-				JSON-LD improvements
+				JSON-LD improvements<br>
+				minor fixes
 			</p>
 			<p>
 				<b>v3.3</b><br>
@@ -1055,6 +1094,8 @@ function betterSEO()
 		</div>
 		
 		<script>
+		var imageseo = ' . json_encode($imageseo ?? "") . ';
+		
 		// Tab functionality
 		document.querySelectorAll(".tab-item").forEach(function(item) {
 			item.addEventListener("click", function() {
@@ -1166,7 +1207,7 @@ function betterSEO()
 		}
 		
 		// Add event listeners to day checkboxes
-		document.querySelectorAll("input[name=\"day[]\"]").forEach(checkbox => {
+		document.querySelectorAll("input[name=\'day[]\']").forEach(checkbox => {
 			checkbox.addEventListener("change", function() {
 				toggleTimeContainer(this);
 			});
@@ -1175,16 +1216,50 @@ function betterSEO()
 		// Function to toggle time container visibility
 		function toggleTimeContainer(checkbox) {
 			const day = checkbox.value;
-			const container = document.getElementById(`time-container-${day}`);
+			const container = document.getElementById("time-container-" + day);
 			if(checkbox.checked) {
 				container.style.display = "block";
 			} else {
 				container.style.display = "none";
 			}
 		}
+		
+		// Add time slot functionality
+		document.addEventListener("click", function(e) {
+			if (e.target.classList.contains("add-time-slot")) {
+				const day = e.target.getAttribute("data-day");
+				const timeSlotsContainer = document.getElementById("time-slots-" + day);
+				
+				const newSlot = document.createElement("div");
+				newSlot.className = "time-slot";
+				newSlot.style.marginBottom = "10px";
+				newSlot.innerHTML = \'<div class="time-row"><div class="time-col"><label>Open</label><select name="\' + day + \'_open[]" class="seoguy-select">\' + generateTimeOptions() + \'</select></div><div class="time-col"><label>Close</label><select name="\' + day + \'_close[]" class="seoguy-select">\' + generateTimeOptions() + \'</select></div><div class="time-col" style="display: flex; align-items: flex-end;"><button type="button" class="add-time-slot" style="background: green; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer;" data-day="\' + day + \'">+</button><button type="button" class="remove-time-slot" style="background: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">x</button></div></div>\';
+				
+				timeSlotsContainer.appendChild(newSlot);
+			}
+			
+			if (e.target.classList.contains("remove-time-slot")) {
+				const timeSlot = e.target.closest(".time-slot");
+				if (timeSlot) {
+					timeSlot.remove();
+				}
+			}
+		});
+
+		// Function to generate time options for JavaScript
+		function generateTimeOptions() {
+			let options = \'\';
+			for (let h = 0; h < 24; h++) {
+				for (let m = 0; m < 60; m += 30) {
+					const time = String(h).padStart(2, \'0\') + \':\' + String(m).padStart(2, \'0\');
+					options += \'<option value="\' + time + \'">\' + time + \'</option>\';
+				}
+			}
+			return options;
+		}
 
 		// Initialize time containers on page load
-		document.querySelectorAll("input[name=\"day[]\"]").forEach(checkbox => {
+		document.querySelectorAll("input[name=\'day[]\']").forEach(checkbox => {
 			toggleTimeContainer(checkbox);
 		});
 
@@ -1300,23 +1375,40 @@ function betterSEO()
 						$jsonldData['geo'] = $geo;
 					}
 					
-					// Business Hours
-					$openingHours = [];
+					// Business Hours - openingHoursSpecification format
+					$openingHoursSpecification = [];
 					$days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-					
+					$dayNames = [
+						'Mo' => 'Monday',
+						'Tu' => 'Tuesday',
+						'We' => 'Wednesday',
+						'Th' => 'Thursday',
+						'Fr' => 'Friday',
+						'Sa' => 'Saturday',
+						'Su' => 'Sunday'
+					];
+
 					foreach ($days as $day) {
 						if (isset($_POST['day']) && in_array($day, $_POST['day'])) {
-							$openTime = $_POST[$day . '_open'] ?? '';
-							$closeTime = $_POST[$day . '_close'] ?? '';
+							$openTimes = $_POST[$day . '_open'] ?? [];
+							$closeTimes = $_POST[$day . '_close'] ?? [];
 							
-							if (!empty($openTime) && !empty($closeTime)) {
-								$openingHours[] = $day . ' ' . $openTime . '-' . $closeTime;
+							// Create a specification for each time slot
+							for ($i = 0; $i < count($openTimes); $i++) {
+								if (!empty($openTimes[$i]) && !empty($closeTimes[$i])) {
+									$openingHoursSpecification[] = [
+										'@type' => 'OpeningHoursSpecification',
+										'dayOfWeek' => [$dayNames[$day]],
+										'opens' => $openTimes[$i],
+										'closes' => $closeTimes[$i]
+									];
+								}
 							}
 						}
 					}
-					
-					if (!empty($openingHours)) {
-						$jsonldData['openingHours'] = $openingHours;
+
+					if (!empty($openingHoursSpecification)) {
+						$jsonldData['openingHoursSpecification'] = $openingHoursSpecification;
 					}
 					
 					break;
@@ -1410,78 +1502,104 @@ function generateBusinessHoursFields() {
 		$jsonldData = json_decode($jsonldContent, true);
 	}
 
-	$timeOptions = '';
-	for ($h = 0; $h < 24; $h++) {
-		for ($m = 0; $m < 60; $m += 30) {
-			$time = sprintf("%02d:%02d", $h, $m);
-			$timeOptions .= '<option value="' . $time . '">' . $time . '</option>';
-		}
-	}
-
 	$html = '';
 	foreach ($days as $code => $day) {
 		$isChecked = false;
-		$openTime = '';
-		$closeTime = '';
+		$timeSlots = [];
 		
 		// Check if this day has opening hours in saved data
-		if (isset($jsonldData['openingHours']) && is_array($jsonldData['openingHours'])) {
-			foreach ($jsonldData['openingHours'] as $hour) {
-				if (strpos($hour, $code) === 0) {
-					$isChecked = true;
-					// Extract times from format like "Mo 09:00-17:00"
-					$timeParts = explode(' ', $hour);
-					if (isset($timeParts[1])) {
-						$times = explode('-', $timeParts[1]);
-						$openTime = $times[0] ?? '';
-						$closeTime = $times[1] ?? '';
+		if (isset($jsonldData['openingHoursSpecification']) && is_array($jsonldData['openingHoursSpecification'])) {
+			foreach ($jsonldData['openingHoursSpecification'] as $spec) {
+				if (isset($spec['dayOfWeek']) && is_array($spec['dayOfWeek'])) {
+					// Check if this day exists in the dayOfWeek array
+					foreach ($spec['dayOfWeek'] as $dayOfWeek) {
+						// Handle both full day names and shortened versions
+						$normalizedDayOfWeek = strtolower(preg_replace('/https?:\/\/schema\.org\//', '', $dayOfWeek));
+						$normalizedCurrentDay = strtolower($day);
+						
+						if ($normalizedDayOfWeek === $normalizedCurrentDay || 
+							strpos($normalizedDayOfWeek, $normalizedCurrentDay) !== false ||
+							strpos($normalizedCurrentDay, $normalizedDayOfWeek) !== false) {
+							$isChecked = true;
+							$timeSlots[] = [
+								'open' => $spec['opens'] ?? '',
+								'close' => $spec['closes'] ?? ''
+							];
+							break;
+						}
 					}
-					break;
 				}
 			}
 		}
 		
+		// If no time slots found, add one empty slot
+		if (empty($timeSlots)) {
+			$timeSlots[] = ['open' => '', 'close' => ''];
+		}
+		
 		$html .= '
-		<label style="display: block; margin-bottom: 10px;">
+		<label style="display: block; margin-bottom: 20px;">
 			<input type="checkbox" name="day[]" value="' . $code . '" class="dow"' . ($isChecked ? ' checked' : '') . '>
 			' . $day . '
 			<div id="time-container-' . $code . '" class="time-container" style="' . ($isChecked ? 'display: block;' : 'display: none;') . '">
-				<div class="time-row">
-					<div class="time-col">
-						<label>Open</label>
-						<select name="' . $code . '_open" class="seoguy-select">';
+				<div id="time-slots-' . $code . '">';
 		
-		// Generate open time options with selected value
-		for ($h = 0; $h < 24; $h++) {
-			for ($m = 0; $m < 60; $m += 30) {
-				$time = sprintf("%02d:%02d", $h, $m);
-				$selected = ($time === $openTime) ? ' selected' : '';
-				$html .= '<option value="' . $time . '"' . $selected . '>' . $time . '</option>';
+		// Generate time slots for this day
+		foreach ($timeSlots as $index => $slot) {
+			$html .= '
+				<div class="time-slot" style="margin-bottom: 10px;">
+					<div class="time-row">
+						<div class="time-col">
+							<label>Open</label>
+							<select name="' . $code . '_open[]" class="seoguy-select">';
+			
+			// Generate open time options with selected value
+			$html .= generateTimeOptions($slot['open']);
+			
+			$html .= '</select>
+						</div>
+						<div class="time-col">
+							<label>Close</label>
+							<select name="' . $code . '_close[]" class="seoguy-select">';
+			
+			// Generate close time options with selected value
+			$html .= generateTimeOptions($slot['close']);
+			
+			$html .= '</select>
+						</div>
+						<div class="time-col" style="display: flex; align-items: flex-end;">
+							<button type="button" class="add-time-slot" style="background: green; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer;" data-day="' . $code . '">+</button>';
+			
+			// Only show remove button if there are multiple slots
+			if ($index > 0) {
+				$html .= '<button type="button" class="remove-time-slot" style="background: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">x</button>';
 			}
+			
+			$html .= '
+						</div>
+					</div>
+				</div>';
 		}
 		
-		$html .= '</select>
-					</div>
-					<div class="time-col">
-						<label>Close</label>
-						<select name="' . $code . '_close" class="seoguy-select">';
-		
-		// Generate close time options with selected value
-		for ($h = 0; $h < 24; $h++) {
-			for ($m = 0; $m < 60; $m += 30) {
-				$time = sprintf("%02d:%02d", $h, $m);
-				$selected = ($time === $closeTime) ? ' selected' : '';
-				$html .= '<option value="' . $time . '"' . $selected . '>' . $time . '</option>';
-			}
-		}
-		
-		$html .= '</select>
-					</div>
+		$html .= '
 				</div>
 			</div>
 		</label>';
 	}
 
 	return $html;
+}
+
+// Helper function to generate time options
+function generateTimeOptions($selectedTime = '') {
+	$options = '';
+	for ($h = 0; $h < 24; $h++) {
+		for ($m = 0; $m < 60; $m += 30) {
+			$time = sprintf("%02d:%02d", $h, $m);
+			$selected = ($time === $selectedTime) ? ' selected' : '';
+			$options .= '<option value="' . $time . '"' . $selected . '>' . $time . '</option>';
+		}
+	}
+	return $options;
 }
 ?>
