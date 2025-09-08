@@ -3,14 +3,17 @@
 # get correct id for plugin
 $thisfile = basename(__FILE__, ".php");
 
+# add in this plugin's language file
+i18n_merge('BetterSEO') || i18n_merge('BetterSEO', 'en_US');
+
 # register plugin
 register_plugin(
 	$thisfile, 		//Plugin id
-	'BetterSEO',	//Plugin name
-	'3.5', 			//Plugin version
+	i18n_r('BetterSEO/LANG_Title'),	//Plugin name
+	'3.6', 			//Plugin version
 	'CE Team', 		//Plugin author
 	'https://getsimple-ce.ovh/donate', //author website
-	'Make Get Simple CMS SEO better!', //Plugin description
+	i18n_r('BetterSEO/LANG_Description'), //Plugin description
 	'plugins', 		//page type - on which admin tab to display
 	'betterSEO' 	//main function (administration)
 );
@@ -18,7 +21,7 @@ register_plugin(
 # activate filter 
 
 # add a link in the admin tab 'theme'
-add_action('plugins-sidebar', 'createSideMenu', [$thisfile, 'BetterSEO Settings']);
+add_action('plugins-sidebar', 'createSideMenu', array($thisfile, i18n_r('BetterSEO/LANG_Settings')));
 
 # functions
 
@@ -653,34 +656,66 @@ function betterSEO()
 				font-size: 0.8rem;
 			}
 			#jsonld-div input {color:blue}
+			.donateButton {
+				box-shadow:inset 0px 1px 0px 0px #fff6af;
+				background:linear-gradient(to bottom, #ffec64 5%, #ffab23 100%);
+				background-color:#ffec64;
+				border-radius:6px;
+				border:1px solid #ffaa22;
+				display:inline-block;
+				cursor:pointer;
+				color:#333333;
+				font-family:Arial;
+				font-size:15px;
+				font-weight:bold;
+				padding:6px 24px;
+				text-decoration:none!important;
+				text-shadow:0px 1px 0px #ffee66;
+			}
+			.donateButton:hover {
+				background:linear-gradient(to bottom, #ffab23 5%, #ffec64 100%);
+				background-color:#ffab23;
+			}
+			.donateButton:active {
+				position:relative;
+				top:1px;
+			}
+			hr.style-two {
+				border: 0;
+				height: 1px;
+				background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+				margin-bottom:30px;
+			}
 		</style>
 
 		<script>
 		var imageseo = ' . json_encode($imageseo ?? "") . ';
 		</script>
 		
-		<h3 style="font-weight:bold; font-style:italic; font-size:1.3rem;">Better Seo Plugin</h3>
-
+		<h3 style="font-weight:bold; font-style:normal; font-size:1.3rem;">' . i18n_r('BetterSEO/LANG_Settings') . '</h3>
+		<p>' . i18n_r('BetterSEO/LANG_Description') . '</p>
+		<hr class="style-two">
+		
 		<div class="tab">
-			<div class="tab-item tab-item-active"><p>Setup</p></div>
-			<div class="tab-item"><p>Help</p></div>
+			<div class="tab-item tab-item-active" id="tab1"><p><b>' . i18n_r('BetterSEO/LANG_Setup') . '</b></p></div>
+			<div class="tab-item" id="tab2"><p><b>' . i18n_r('BetterSEO/LANG_Help') . '</b></p></div>
 		</div>
 
 		<div class="tab-content-1">
 			<form method="post" class="seoguy">
 				
-				<h3>Homepage Title</h3>
+				<h3>' . i18n_r('BetterSEO/LANG_Homepage_Title') . '</h3>
 
 				<select name="homepagetitle" class="seoguy-select">
-					<option value="normal">Normal</option>
-					<option value="titlefirst">Website Name | Page Title</option>
-					<option value="titleonly">Only Website Name</option>
+					<option value="normal">' . i18n_r('BetterSEO/LANG_Normal') . '</option>
+					<option value="titlefirst">' . i18n_r('BetterSEO/LANG_Website_Name') . '</option>
+					<option value="titleonly">' . i18n_r('BetterSEO/LANG_Only_Website_Name') . '</option>
 				</select>
 				
 				<hr>
 
-				<h3 style="margin-top:20px;"> Favicons</h3>
-				<p class="leader"> Icons need to be included in a folder named "fav" within your themes dir. (Visit generator <a href="https://www.favicon-generator.org/" target="_blank">here</a>.)</p>
+				<h3 style="margin-top:20px;">' . i18n_r('BetterSEO/LANG_Favicons') . '</h3>
+				<p class="leader">' . i18n_r('BetterSEO/LANG_Favicons_Text') . '</p>
 
 				<label >
 					<input type="checkbox" name="favicon">
@@ -691,8 +726,8 @@ function betterSEO()
 
 				<hr>
 				
-				<h3>Dublin Core</h3>
-				<p class="leader">Metadata Element Set</p>
+				<h3>' . i18n_r('BetterSEO/LANG_DublinCore') . 'Dublin Core</h3>
+				<p class="leader">' . i18n_r('BetterSEO/LANG_DublinCore_Text') . '</p>
 				
 				<label >
 					<input type="checkbox" name="dublincheck">
@@ -702,15 +737,15 @@ function betterSEO()
 				</label>
 				
 				<div id="dublin-div">
-					<p>Language code (eg: en, es, de, pl, etc.)</p>
+					<p>' . i18n_r('BetterSEO/LANG_Language_Code') . '</p>
 					<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="dublin" placeholder="en" value="' . (file_exists($dublinfile) ? file_get_contents($dublinfile) : '') . '">
 				</div>
 				
 				<hr>
 
-				<h3>GeoLocation</h3>
+				<h3>' . i18n_r('BetterSEO/LANG_GeoLocation') . '</h3>
 
-				<p class="leader">GeoLocation (Visit generator  <a target="_blank" href="https://www.geo-tag.de/generator/en.html">here</a>.)</p>
+				<p class="leader">' . i18n_r('BetterSEO/LANG_GeoLocation_Text') . '</p>
 
 				<label >
 					<input type="checkbox" name="geocheck">
@@ -726,8 +761,8 @@ function betterSEO()
 				
 				<hr>
 				
-				<h3 style="margin-top:20px;">Facebook</h3>
-				<p class="leader">og:image (for FB, Twitter, etc.)</p>
+				<h3 style="margin-top:20px;">' . i18n_r('BetterSEO/LANG_Facebook') . '</h3>
+				<p class="leader">' . i18n_r('BetterSEO/LANG_Facebook_Text') . '</p>
 			
 				<label >
 					<input type="checkbox" name="facebookcheck">
@@ -737,24 +772,24 @@ function betterSEO()
 				</label>
 
 				<div id="fb-div">
-					<p>custom_field name (requires I18N Custom Fields plugin): </p>
+					<p>' . i18n_r('BetterSEO/LANG_Custom_Field_Name') . ': </p>
 					<input type="text" name="fbcustom" value="' . (file_exists($fbcustomfile) ? file_get_contents($fbcustomfile) : '') . '" style="width:100%; padding:10px; box-sizing:border-box; color:blue;" placeholder="my-customField">
 					
 					<br>
 
-					<p>multiField name (requires MultiField plugin): </p>
+					<p>' . i18n_r('BetterSEO/LANG_MultiField_Name') . ': </p>
 					<input type="text" name="multifieldcustom" value="' . (file_exists($multifieldfile) ? file_get_contents($multifieldfile) : '') . '" style="width:100%; padding:10px; box-sizing:border-box; color:blue;" placeholder="my-multiField">
 				 
 					
-					<p> or Static image:</p>
+					<p>' . i18n_r('BetterSEO/LANG_Static_Image') . ':</p>
 					<input type="text" style="width:100%; padding:10px; box-sizing:border-box; color:blue" name="fbimage" value="' . (file_exists($fbimagefile) ? file_get_contents($fbimagefile) : '') . '" placeholder="Image URL">
-					<button style="background: orangered; color: #fff; border: none; padding: 10px 15px; cursor: pointer; border-radius: 7px; width: 20%; margin-top: 20px;" onclick="event.preventDefault();window.open(`' . $SITEURL . 'plugins/BetterSeo/files/imagebrowser.php?&func=multifield[]&count=0`,`myWindow`,`tolbar=no,scrollbars=no,menubar=no,width=500,height=500`)">Select Photo</button>
+					<button style="background: orangered; color: #fff; border: none; padding: 10px 15px; cursor: pointer; border-radius: 7px; width: 20%; margin-top: 20px;" onclick="event.preventDefault();window.open(`' . $SITEURL . 'plugins/BetterSeo/files/imagebrowser.php?&func=multifield[]&count=0`,`myWindow`,`tolbar=no,scrollbars=no,menubar=no,width=500,height=500`)">' . i18n_r('BetterSEO/LANG_Select_Photo') . '</button>
 				</div>
 
 				<hr>
 				
-				<h3>Twitter/X Card</h3>
-				<p class="leader">When being shared on Twitter/X, these tags help you control the preview.</p>
+				<h3>' . i18n_r('BetterSEO/LANG_Twitter') . '</h3>
+				<p class="leader">' . i18n_r('BetterSEO/LANG_Twitter_Text') . '</p>
 				
 				<label >
 					<input type="checkbox" name="twittercheck">
@@ -765,8 +800,8 @@ function betterSEO()
 
 				<hr>
 				
-				<h3>Apple Web App Tags</h3>
-				<p class="leader">Enhance the iOS/PWA mobile experience.</p>
+				<h3>' . i18n_r('BetterSEO/LANG_Apple') . '</h3>
+				<p class="leader">' . i18n_r('BetterSEO/LANG_Apple_Text') . '</p>
 				
 				<label >
 					<input type="checkbox" name="applecheck">
@@ -777,8 +812,8 @@ function betterSEO()
 
 				<hr>
 
-				<h3>JSON-LD Schema </h3>
-				<p class="leader">Add structured data to your site for better search engine understanding.</p>
+				<h3>' . i18n_r('BetterSEO/LANG_JSON_LD') . '</h3>
+				<p class="leader">' . i18n_r('BetterSEO/LANG_JSON_LD_Text') . '</p>
 
 				<label >
 					<input type="checkbox" name="jsonldcheck">
@@ -790,19 +825,21 @@ function betterSEO()
 
 				<div id="jsonld-div">
 					<select name="jsontype" id="jsontype" class="seoguy-select">
-						<option value="Local Business"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Local Business' ? ' selected' : '') . '>Local Business</option>
+						<option value="Local Business"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Local Business' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Local_Business') . '</option>
 						
-						<option value="Organization"' . (isset($jsonldData['@type']) && ($jsonldData['@type'] == 'Organization' || $jsonldData['@type'] == 'Corporation' || $jsonldData['@type'] == 'EducationalOrganization' || $jsonldData['@type'] == 'GovernmentOrganization' || $jsonldData['@type'] == 'NGO' || $jsonldData['@type'] == 'PerformingGroup' || $jsonldData['@type'] == 'SportsTeam') ? ' selected' : '') . '>Organization</option>
+						<option value="Organization"' . (isset($jsonldData['@type']) && ($jsonldData['@type'] == 'Organization' || $jsonldData['@type'] == 'Corporation' || $jsonldData['@type'] == 'EducationalOrganization' || $jsonldData['@type'] == 'GovernmentOrganization' || $jsonldData['@type'] == 'NGO' || $jsonldData['@type'] == 'PerformingGroup' || $jsonldData['@type'] == 'SportsTeam') ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Organization') . '</option>
 						
-						<option value="Person"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Person' ? ' selected' : '') . '>Person</option>
+						<option value="Person"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Person' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Person') . '</option>
 					</select>
 
 					<div id="localBusiness" style="display:none;">
-						<p style="margin-bottom:0px;">Type:</p>
+						<p style="margin-bottom:0px;">' . i18n_r('BetterSEO/LANG_Type') . ':</p>
 						<select id="bType" name="bType" class="seoguy-select">
-							<option value="">- Select Business Type -</option>
+							<option value="">- ' . i18n_r('BetterSEO/LANG_Select_Business_Type') . ' -</option>
+
 							<option value="AnimalShelter"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AnimalShelter' ? ' selected' : '') . '>Animal Shelter</option>
-							<optgroup label="Automotive" id="automotive">
+
+							<optgroup label="• Automotive">
 								<option value="AutomotiveBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutomotiveBusiness' ? ' selected' : '') . '>Automotive Business</option>
 								<option value="AutoBodyShop"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutoBodyShop' ? ' selected' : '') . '>Auto Body Shop</option>
 								<option value="AutoDealer"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutoDealer' ? ' selected' : '') . '>Auto Dealer</option>
@@ -814,16 +851,20 @@ function betterSEO()
 								<option value="MotorcycleDealer"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MotorcycleDealer' ? ' selected' : '') . '>Motorcycle Dealer</option>
 								<option value="MotorcycleRepair"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MotorcycleRepair' ? ' selected' : '') . '>Motorcycle Repair</option>
 							</optgroup>
+
 							<option value="ChildCare"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ChildCare' ? ' selected' : '') . '>Child Care</option>
 							<option value="DryCleaningOrLaundry"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'DryCleaningOrLaundry' ? ' selected' : '') . '>Dry Cleaning Or Laundry</option>
-							<optgroup label="Emergency">
+							
+							<optgroup label="• Emergency">
 								<option value="EmergencyService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'EmergencyService' ? ' selected' : '') . '>Emergency Service</option>
 								<option value="FireStation"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'FireStation' ? ' selected' : '') . '>Fire Station</option>
 								<option value="Hospital"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Hospital' ? ' selected' : '') . '>Hospital</option>
 								<option value="PoliceStation"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'PoliceStation' ? ' selected' : '') . '>Police Station</option>
 							</optgroup>
+
 							<option value="EmploymentAgency"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'EmploymentAgency' ? ' selected' : '') . '>Employment Agency</option>
-							<optgroup label="Entertainment">
+
+							<optgroup label="• Entertainment">
 								<option value="EntertainmentBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'EntertainmentBusiness' ? ' selected' : '') . '>Entertainment Business</option>
 								<option value="AdultEntertainment"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AdultEntertainment' ? ' selected' : '') . '>Adult Entertainment</option>
 								<option value="AmusementPark"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AmusementPark' ? ' selected' : '') . '>Amusement Park</option>
@@ -833,14 +874,16 @@ function betterSEO()
 								<option value="MovieTheater"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MovieTheater' ? ' selected' : '') . '>Movie Theater</option>
 								<option value="NightClub"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'NightClub' ? ' selected' : '') . '>Night Club</option>
 							</optgroup>
-							<optgroup label="Financial">
+
+							<optgroup label="• Financial">
 								<option value="FinancialService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'FinancialService' ? ' selected' : '') . '>Financial Service</option>
 								<option value="AccountingService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AccountingService' ? ' selected' : '') . '>Accounting Service</option>
 								<option value="AutomatedTeller"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutomatedTeller' ? ' selected' : '') . '>Automated Teller</option>
 								<option value="BankOrCreditUnion"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BankOrCreditUnion' ? ' selected' : '') . '>Bank Or Credit Union</option>
 								<option value="InsuranceAgency"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'InsuranceAgency' ? ' selected' : '') . '>Insurance Agency</option>
 							</optgroup>
-							<optgroup label="Food">
+
+							<optgroup label="• Food & Drink">
 								<option value="FoodEstablishment"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'FoodEstablishment' ? ' selected' : '') . '>Food Establishment</option>
 								<option value="Bakery"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Bakery' ? ' selected' : '') . '>Bakery</option>
 								<option value="BarOrPub"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BarOrPub' ? ' selected' : '') . '>Bar Or Pub</option>
@@ -850,12 +893,17 @@ function betterSEO()
 								<option value="IceCreamShop"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'IceCreamShop' ? ' selected' : '') . '>Ice Cream Shop</option>
 								<option value="Restaurant"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Restaurant' ? ' selected' : '') . '>Restaurant</option>
 								<option value="Winery"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Winery' ? ' selected' : '') . '>Winery</option>
+								<option value="Butcher"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Butcher' ? ' selected' : '') . '>Butcher</option>
+								<option value="GroceryStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'GroceryStore' ? ' selected' : '') . '>Grocery Store</option>
+								<option value="LiquorStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'LiquorStore' ? ' selected' : '') . '>Liquor Store</option>
 							</optgroup>
-							<optgroup label="Government">
+							
+							<optgroup label="• Government">
 								<option value="GovernmentOffice"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'GovernmentOffice' ? ' selected' : '') . '>Government Office</option>
 								<option value="PostOffice"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'PostOffice' ? ' selected' : '') . '>Post Office</option>
 							</optgroup>
-							<optgroup label="Health And Beauty">
+							
+							<optgroup label="• Health & Beauty">
 								<option value="HealthAndBeautyBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HealthAndBeautyBusiness' ? ' selected' : '') . '>Health And Beauty Business</option>
 								<option value="BeautySalon"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BeautySalon' ? ' selected' : '') . '>Beauty Salon</option>
 								<option value="DaySpa"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'DaySpa' ? ' selected' : '') . '>Day Spa</option>
@@ -864,24 +912,31 @@ function betterSEO()
 								<option value="NailSalon"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'NailSalon' ? ' selected' : '') . '>Nail Salon</option>
 								<option value="TattooParlor"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'TattooParlor' ? ' selected' : '') . '>Tattoo Parlor</option>
 							</optgroup>
-							<optgroup label="Home And Construction">
+							
+							<optgroup label="• Home & Construction">
 								<option value="HomeAndConstructionBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HomeAndConstructionBusiness' ? ' selected' : '') . '>Home And Construction Business</option>
 								<option value="Electrician"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Electrician' ? ' selected' : '') . '>Electrician</option>
 								<option value="GeneralContractor"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'GeneralContractor' ? ' selected' : '') . '>General Contractor</option>
 								<option value="HVACBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HVACBusiness' ? ' selected' : '') . '>HVAC Business</option>
 								<option value="HousePainter"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HousePainter' ? ' selected' : '') . '>House Painter</option>
+								<option value="Locksmith"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Locksmith' ? ' selected' : '') . '>Locksmith</option>
 								<option value="MovingCompany"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MovingCompany' ? ' selected' : '') . '>Moving Company</option>
 								<option value="Plumber"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Plumber' ? ' selected' : '') . '>Plumber</option>
 								<option value="RoofingContractor"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'RoofingContractor' ? ' selected' : '') . '>Roofing Contractor</option>
+								<option value="HardwareStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HardwareStore' ? ' selected' : '') . '>Hardware Store</option>
 							</optgroup>
+							
 							<option value="InternetCafe"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'InternetCafe' ? ' selected' : '') . '>Internet Cafe</option>
-							<optgroup label="Legal">
+							
+							<optgroup label="• Legal">
 								<option value="LegalService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'LegalService' ? ' selected' : '') . '>Legal Service</option>
 								<option value="Attorney"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Attorney' ? ' selected' : '') . '>Attorney</option>
 								<option value="Notary"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Notary' ? ' selected' : '') . '>Notary</option>
 							</optgroup>
-								<option value="Library"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Library' ? ' selected' : '') . '>Library</option>
-							<optgroup label="Lodging">
+							
+							<option value="Library"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Library' ? ' selected' : '') . '>Library</option>
+								
+							<optgroup label="• Lodging">
 								<option value="LodgingBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'LodgingBusiness' ? ' selected' : '') . '>Lodging Business</option>
 								<option value="BedAndBreakfast"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BedAndBreakfast' ? ' selected' : '') . '>Bed And Breakfast</option>
 								<option value="Campground"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Campground' ? ' selected' : '') . '>Campground</option>
@@ -890,87 +945,95 @@ function betterSEO()
 								<option value="Motel"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Motel' ? ' selected' : '') . '>Motel</option>
 								<option value="Resort"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Resort' ? ' selected' : '') . '>Resort</option>
 							</optgroup>
-							<optgroup label="Medical">
+							
+							<optgroup label="• Medical">
 								<option value="MedicalBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MedicalBusiness' ? ' selected' : '') . '>Medical Business</option>
-								<option value="CommunityHealth"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'CommunityHealth' ? ' selected' : '') . '>Community Health</option>
 								<option value="Dentist"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Dentist' ? ' selected' : '') . '>Dentist</option>
 								<option value="DiagnosticLab"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'DiagnosticLab' ? ' selected' : '') . '>Diagnostic Lab</option>
-								<option value="Dermatology"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Dermatology' ? ' selected' : '') . '>Dermatology</option>
-								<option value="DietNutrition"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'DietNutrition' ? ' selected' : '') . '>Diet Nutrition</option>
-								<option value="Emergency"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Emergency' ? ' selected' : '') . '>Emergency</option>
-								<option value="Geriatric"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Geriatric' ? ' selected' : '') . '>Geriatric</option>
-								<option value="Gynecologic"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Gynecologic' ? ' selected' : '') . '>Gynecologic</option>
 								<option value="MedicalClinic"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MedicalClinic' ? ' selected' : '') . '>Medical Clinic</option>
-								<option value="Midwifery"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Midwifery' ? ' selected' : '') . '>Midwifery</option>
-								<option value="Nursing"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Nursing' ? ' selected' : '') . '>Nursing</option>
-								<option value="Obstetric"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Obstetric' ? ' selected' : '') . '>Obstetric</option>
-								<option value="Oncologic"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Oncologic' ? ' selected' : '') . '>Oncologic</option>
-								<option value="Optician"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Optician' ? ' selected' : '') . '>Optician</option>
-								<option value="Optometric"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Optometric' ? ' selected' : '') . '>Optometric</option>
-								<option value="Otolaryngologic"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Otolaryngologic' ? ' selected' : '') . '>Otolaryngologic</option>
-								<option value="Pediatric"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Pediatric' ? ' selected' : '') . '>Pediatric</option>
 								<option value="Pharmacy"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Pharmacy' ? ' selected' : '') . '>Pharmacy</option>
 								<option value="Physician"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Physician' ? ' selected' : '') . '>Physician</option>
-								<option value="Physiotherapy"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Physiotherapy' ? ' selected' : '') . '>Physiotherapy</option>
-								<option value="PlasticSurgery"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'PlasticSurgery' ? ' selected' : '') . '>Plastic Surgery</option>
-								<option value="Podiatric"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Podiatric' ? ' selected' : '') . '>Podiatric</option>
-								<option value="PrimaryCare"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'PrimaryCare' ? ' selected' : '') . '>Primary Care</option>
-								<option value="Psychiatric"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Psychiatric' ? ' selected' : '') . '>Psychiatric</option>
-								<option value="PublicHealth"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'PublicHealth' ? ' selected' : '') . '>Public Health</option>
+								<option value="VeterinaryCare"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'VeterinaryCare' ? ' selected' : '') . '>Veterinary Care</option>
 							</optgroup>
-							<optgroup label="Professional Services">
-								<option value="Locksmith"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Locksmith' ? ' selected' : '') . '>Locksmith</option>
+	
+							<optgroup label="• Professional Services">
+								<option value="Photographer"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Photographer' ? ' selected' : '') . '>Photographer</option>
 								<option value="ProfessionalService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ProfessionalService' ? ' selected' : '') . '>Professional Service</option>
-								<option value="RealEstateAgent"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'RealEstateAgent' ? ' selected' : '') . '>Real Estate Agent</option>
-								<option value="TravelAgency"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'TravelAgency' ? ' selected' : '') . '>Travel Agency</option>
 							</optgroup>
+
+							<optgroup label="• Real Estate">
+								<option value="RealEstateAgent"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'RealEstateAgent' ? ' selected' : '') . '>Real Estate Agent</option>
+							</optgroup>
+
 							<option value="RadioStation"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'RadioStation' ? ' selected' : '') . '>Radio Station</option>
 							<option value="RecyclingCenter"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'RecyclingCenter' ? ' selected' : '') . '>Recycling Center</option>
 							<option value="SelfStorage"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'SelfStorage' ? ' selected' : '') . '>Self Storage</option>
-							<option value="ShoppingCenter"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ShoppingCenter' ? ' selected' : '') . '>Shopping Center</option>
 							<option value="SportsActivityLocation"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'SportsActivityLocation' ? ' selected' : '') . '>Sports Activity Location</option>
-							<option value="Store"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Store' ? ' selected' : '') . '>Store</option>
+							
+							<optgroup label="• Shopping">
+								<option value="Store"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Store' ? ' selected' : '') . '>Generic Store</option>
+								<option value="BikeStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BikeStore' ? ' selected' : '') . '>Bike Store</option>
+								<option value="BookStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BookStore' ? ' selected' : '') . '>Book Store</option>
+								<option value="ClothingStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ClothingStore' ? ' selected' : '') . '>Clothing Store</option>
+								<option value="ComputerStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ComputerStore' ? ' selected' : '') . '>Computer Store</option>
+								<option value="ConvenienceStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ConvenienceStore' ? ' selected' : '') . '>Convenience Store</option>
+								<option value="ElectronicsStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ElectronicsStore' ? ' selected' : '') . '>Electronics Store</option>
+								<option value="Florist"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Florist' ? ' selected' : '') . '>Florist</option>
+								<option value="FurnitureStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'FurnitureStore' ? ' selected' : '') . '>Furniture Store</option>
+								<option value="GardenStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'GardenStore' ? ' selected' : '') . '>Garden Store</option>
+								<option value="HobbyShop"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HobbyShop' ? ' selected' : '') . '>Hobby Shop</option>
+								<option value="JewelryStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'JewelryStore' ? ' selected' : '') . '>Jewelry Store</option>
+								<option value="MusicStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MusicStore' ? ' selected' : '') . '>Music Store</option>
+								<option value="OfficeEquipmentStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'OfficeEquipmentStore' ? ' selected' : '') . '>Office Equipment Store</option>
+								<option value="PetStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'PetStore' ? ' selected' : '') . '>Pet Store</option>
+								<option value="ShoeStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ShoeStore' ? ' selected' : '') . '>Shoe Store</option>
+								<option value="ShoppingCenter"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ShoppingCenter' ? ' selected' : '') . '>Shopping Center</option>
+								<option value="SportingGoodsStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'SportingGoodsStore' ? ' selected' : '') . '>Sporting Goods Store</option>
+								<option value="ToyStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ToyStore' ? ' selected' : '') . '>Toy Store</option>
+							</optgroup>
+
 							<option value="TelevisionStation"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'TelevisionStation' ? ' selected' : '') . '>Television Station</option>
 							<option value="TouristInformationCenter"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'TouristInformationCenter' ? ' selected' : '') . '>Tourist Information Center</option>
+							<option value="TravelAgency"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'TravelAgency' ? ' selected' : '') . '>Travel Agency</option>
 						</select>
-						<p>Business Name:</p>
-						<input type="text" name="bName" value="' . (isset($jsonldData['name']) ? htmlspecialchars($jsonldData['name']) : '') . '" class="seoguy-input" placeholder="Business Name">
-						<p>Telephone:</p>
-						<input type="text" name="bTelephone" value="' . (isset($jsonldData['telephone']) ? htmlspecialchars($jsonldData['telephone']) : '') . '" class="seoguy-input" placeholder="+1-555-555-5555">
-						<p>Address:</p>
 						
+						<p>' . i18n_r('BetterSEO/LANG_Business_Name') . ':</p>
+						<input type="text" name="bName" value="' . (isset($jsonldData['name']) ? htmlspecialchars($jsonldData['name']) : '') . '" class="seoguy-input" placeholder="Business Name">
+						<p>' . i18n_r('BetterSEO/LANG_Telephone') . ':</p>
+						<input type="text" name="bTelephone" value="' . (isset($jsonldData['telephone']) ? htmlspecialchars($jsonldData['telephone']) : '') . '" class="seoguy-input" placeholder="+1-555-555-5555">
+						<p>' . i18n_r('BetterSEO/LANG_Address') . ':</p>
 						<input type="text" name="bAddress" value="' . (isset($jsonldData['address']['streetAddress']) ? htmlspecialchars($jsonldData['address']['streetAddress']) : '') . '" class="seoguy-input" placeholder="123 Main St">
-						<p>City:</p>
+						<p>' . i18n_r('BetterSEO/LANG_City') . ':</p>
 						<input type="text" name="bCity" value="' . (isset($jsonldData['address']['addressLocality']) ? htmlspecialchars($jsonldData['address']['addressLocality']) : '') . '" class="seoguy-input" placeholder="City">
-						<p>State/Province:</p>
+						<p>' . i18n_r('BetterSEO/LANG_State_Province') . ':</p>
 						<input type="text" name="bState" value="' . (isset($jsonldData['address']['addressRegion']) ? htmlspecialchars($jsonldData['address']['addressRegion']) : '') . '" class="seoguy-input" placeholder="State">
-						<p>Postal Code:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Postal_Code') . ':</p>
 						<input type="text" name="bPostalCode" value="' . (isset($jsonldData['address']['postalCode']) ? htmlspecialchars($jsonldData['address']['postalCode']) : '') . '" class="seoguy-input" placeholder="12345">
-						<p>Country:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Country') . ':</p>
 						<input type="text" name="bCountry" value="' . (isset($jsonldData['address']['addressCountry']) ? htmlspecialchars($jsonldData['address']['addressCountry']) : '') . '" class="seoguy-input" placeholder="Country">
 						
-						<p>Latitude:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Latitude') . ':</p>
 						<input type="text" name="bLatitude" value="' . (isset($jsonldData['geo']['latitude']) ? htmlspecialchars($jsonldData['geo']['latitude']) : '') . '" class="seoguy-input" placeholder="40.7128">
-						<p>Longitude:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Longitude') . ':</p>
 						<input type="text" name="bLongitude" value="' . (isset($jsonldData['geo']['longitude']) ? htmlspecialchars($jsonldData['geo']['longitude']) : '') . '" class="seoguy-input" placeholder="-74.0060">
-						<p>Google Map URL:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Google_Map') . ':</p>
 						<input type="text" name="bGoogleMap" value="' . (isset($jsonldData['hasMap']) ? htmlspecialchars($jsonldData['hasMap']) : '') . '" class="seoguy-input" placeholder="https://maps.google.com">
 						
-						<p>Business Hours:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Business_Hours') . ':</p>
 							' . generateBusinessHoursFields() . '
 							
-						<p>Price Range:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Price_Range') . ':</p>
 						<select name="bPriceRange" class="seoguy-select">
-							<option value="">- Choose -</option>
-							<option value="$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$' ? ' selected' : '') . '>$ = Inexpensive, usually $10 and under</option>
-							<option value="$$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$$' ? ' selected' : '') . '>$$ = Moderately expensive, usually between $10-$25</option>
-							<option value="$$$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$$$' ? ' selected' : '') . '>$$$ = Expensive, usually between $25-$45</option>
-							<option value="$$$$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$$$$' ? ' selected' : '') . '>$$$$ = Very Expensive, usually $50 and up</option>
+							<option value="">- ' . i18n_r('BetterSEO/LANG_Choose') . ' -</option>
+							<option value="$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$' ? ' selected' : '') . '>$ = ' . i18n_r('BetterSEO/LANG_Inexpensive') . '</option>
+							<option value="$$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$$' ? ' selected' : '') . '>$$ = ' . i18n_r('BetterSEO/LANG_Moderately_Expensive') . '</option>
+							<option value="$$$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$$$' ? ' selected' : '') . '>$$$ = ' . i18n_r('BetterSEO/LANG_Expensive') . '</option>
+							<option value="$$$$"' . (isset($jsonldData['priceRange']) && $jsonldData['priceRange'] == '$$$$' ? ' selected' : '') . '>$$$$ = ' . i18n_r('BetterSEO/LANG_Very_Expensive') . '</option>
 						</select>
 					</div>
 
 					<div id="organization" style="display:none;">
-						<p style="margin-bottom:0px;">Type:</p>
+						<p style="margin-bottom:0px;">' . i18n_r('BetterSEO/LANG_Type') . ':</p>
 						<select id="oType" name="oType" class="seoguy-select">
 							<option value="">- Select Org. Type-</option>
 							<option value="Organization"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Organization' ? ' selected' : '') . '>Organization</option>
@@ -982,84 +1045,88 @@ function betterSEO()
 							<option value="SportsTeam"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'SportsTeam' ? ' selected' : '') . '>Sports Team</option>
 						</select>
 						
-						<p>Organization Name:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Org_Name') . ':</p>
 						<input type="text" name="oName" value="' . (isset($jsonldData['name']) ? htmlspecialchars($jsonldData['name']) : '') . '" class="seoguy-input" placeholder="Organization Name">
-						<p>Telephone:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Telephone') . ':</p>
 						<input type="text" name="oTelephone" value="' . (isset($jsonldData['telephone']) ? htmlspecialchars($jsonldData['telephone']) : '') . '" class="seoguy-input" placeholder="+1-555-555-5555">
 						
-						<p>Address:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Address') . ':</p>
 						<input type="text" name="oAddress" value="' . (isset($jsonldData['address']['streetAddress']) ? htmlspecialchars($jsonldData['address']['streetAddress']) : '') . '" class="seoguy-input" placeholder="123 Main St">
-						<p>City:</p>
+						<p>' . i18n_r('BetterSEO/LANG_City') . ':</p>
 						<input type="text" name="oCity" value="' . (isset($jsonldData['address']['addressLocality']) ? htmlspecialchars($jsonldData['address']['addressLocality']) : '') . '" class="seoguy-input" placeholder="City">
-						<p>State/Province:</p>
+						<p>' . i18n_r('BetterSEO/LANG_State_Province') . ':</p>
 						<input type="text" name="oState" value="' . (isset($jsonldData['address']['addressRegion']) ? htmlspecialchars($jsonldData['address']['addressRegion']) : '') . '" class="seoguy-input" placeholder="State">
-						<p>Postal Code:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Postal_Code') . ':</p>
 						<input type="text" name="oPostalCode" value="' . (isset($jsonldData['address']['postalCode']) ? htmlspecialchars($jsonldData['address']['postalCode']) : '') . '" class="seoguy-input" placeholder="12345">
-						<p>Country:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Country') . ':</p>
 						<input type="text" name="oCountry" value="' . (isset($jsonldData['address']['addressCountry']) ? htmlspecialchars($jsonldData['address']['addressCountry']) : '') . '" class="seoguy-input" placeholder="Country">
 						
-						<p>Latitude:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Latitude') . ':</p>
 						<input type="text" name="oLatitude" value="' . (isset($jsonldData['geo']['latitude']) ? htmlspecialchars($jsonldData['geo']['latitude']) : '') . '" class="seoguy-input" placeholder="40.7128">
-						<p>Longitude:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Longitude') . ':</p>
 						<input type="text" name="oLongitude" value="' . (isset($jsonldData['geo']['longitude']) ? htmlspecialchars($jsonldData['geo']['longitude']) : '') . '" class="seoguy-input" placeholder="-74.0060">
-						<p>Google Map URL:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Google_Map') . ':</p>
 						<input type="text" name="oGoogleMap" value="' . (isset($jsonldData['hasMap']) ? htmlspecialchars($jsonldData['hasMap']) : '') . '" class="seoguy-input" placeholder="https://maps.google.com">
 					</div>
 
 					<div id="person" style="display:none;">
-						<p>Name:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Name') . ':</p>
 						<input type="text" name="pName" value="' . (isset($jsonldData['name']) ? htmlspecialchars($jsonldData['name']) : '') . '" class="seoguy-input" placeholder="Full Name">
 							
-						<p>Gender:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Gender') . ':</p>
 						<select name="pGender" class="seoguy-select">
 							<option value="">- Choose -</option>
-							<option value="male"' . (isset($jsonldData['gender']) && $jsonldData['gender'] == 'male' ? ' selected' : '') . '>male</option>
-							<option value="female"' . (isset($jsonldData['gender']) && $jsonldData['gender'] == 'female' ? ' selected' : '') . '>female</option>
+							<option value="male"' . (isset($jsonldData['gender']) && $jsonldData['gender'] == 'male' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Male') . '</option>
+							<option value="female"' . (isset($jsonldData['gender']) && $jsonldData['gender'] == 'female' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Female') . '</option>
 						</select>
 						
-						<p>Birth Place:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Birth_Place') . ':</p>
 						<input type="text" name="pBirthPlace" value="' . (isset($jsonldData['birthPlace']) ? htmlspecialchars($jsonldData['birthPlace']) : '') . '" class="seoguy-input" maxlength="10">
 						
-						<p>Birth Date (YYYY-MM-DD):</p>
+						<p>' . i18n_r('BetterSEO/LANG_Birth_Date') . ':</p>
 						<input type="text" name="pBirthDate" value="' . (isset($jsonldData['birthDate']) ? htmlspecialchars($jsonldData['birthDate']) : '') . '" class="seoguy-input" placeholder="YYYY-MM-DD" maxlength="10">
 							
-						<p>Nationality:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Nationality') . ':</p>
 						<input type="text" name="pNationality" value="' . (isset($jsonldData['nationality']) ? htmlspecialchars($jsonldData['nationality']) : '') . '" class="seoguy-input" placeholder="American">
 							
-						<p>Job Title:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Job') . ':</p>
 						<input type="text" name="pJobTitle" value="' . (isset($jsonldData['jobTitle']) ? htmlspecialchars($jsonldData['jobTitle']) : '') . '" class="seoguy-input" placeholder="Job Title">
 						
-						<p>Alumni Of:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Alumni') . ':</p>
 						<input type="text" name="pAlumniOf" value="' . (isset($jsonldData['alumniOf']) ? htmlspecialchars($jsonldData['alumniOf']) : '') . '" class="seoguy-input">
 							
-						<p>Telephone:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Telephone') . ':</p>
 						<input type="text" name="pTelephone" value="' . (isset($jsonldData['telephone']) ? htmlspecialchars($jsonldData['telephone']) : '') . '" class="seoguy-input" placeholder="+1-555-555-5555">
 						
 						
-						<p>Address:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Address') . ':</p>
 						<input type="text" name="pAddress" value="' . (isset($jsonldData['address']['streetAddress']) ? htmlspecialchars($jsonldData['address']['streetAddress']) : '') . '" class="seoguy-input" placeholder="123 Main St">
-						<p>City:</p>
+						<p>' . i18n_r('BetterSEO/LANG_City') . ':</p>
 						<input type="text" name="pCity" value="' . (isset($jsonldData['address']['addressLocality']) ? htmlspecialchars($jsonldData['address']['addressLocality']) : '') . '" class="seoguy-input" placeholder="City">
-						<p>State/Province:</p>
+						<p>' . i18n_r('BetterSEO/LANG_State_Province') . ':</p>
 						<input type="text" name="pState" value="' . (isset($jsonldData['address']['addressRegion']) ? htmlspecialchars($jsonldData['address']['addressRegion']) : '') . '" class="seoguy-input" placeholder="State">
-						<p>Postal Code:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Postal_Code') . ':</p>
 						<input type="text" name="pPostalCode" value="' . (isset($jsonldData['address']['postalCode']) ? htmlspecialchars($jsonldData['address']['postalCode']) : '') . '" class="seoguy-input" placeholder="12345">
-						<p>Country:</p>
+						<p>' . i18n_r('BetterSEO/LANG_Country') . ':</p>
 						<input type="text" name="pCountry" value="' . (isset($jsonldData['address']['addressCountry']) ? htmlspecialchars($jsonldData['address']['addressCountry']) : '') . '" class="seoguy-input" placeholder="Country">
 					</div>
 				</div>
 
-				<input type="submit" name="submit" value="Save Settings" class="submit">
+				<input type="submit" name="submit" value="' . i18n_r('BetterSEO/LANG_Save_Settings') . '" class="submit">
 			</form>
+			
+			<div id="paypal" style="padding-top:20px">
+				<a href="https://getsimple-ce.ovh/donate" target="_blank" class="donateButton">' . i18n_r('BetterSEO/LANG_PayPal') . '<svg xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-opacity="0" d="M17 14v4c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-4Z"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.5s" values="0;1"></animate></path><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="48" stroke-dashoffset="48" d="M17 9v9c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-9Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="48;0"></animate></path><path stroke-dasharray="14" stroke-dashoffset="14" d="M17 9h3c0.55 0 1 0.45 1 1v3c0 0.55 -0.45 1 -1 1h-3"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="14;0"></animate></path><mask id="lineMdCoffeeHalfEmptyFilledLoop0"><path stroke="#fff" d="M8 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M12 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M16 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4"><animateMotion calcMode="linear" dur="3s" path="M0 0v-8" repeatCount="indefinite"></animateMotion></path></mask><rect width="24" height="0" y="7" fill="currentColor" mask="url(#lineMdCoffeeHalfEmptyFilledLoop0)"><animate fill="freeze" attributeName="y" begin="0.8s" dur="0.6s" values="7;2"></animate><animate fill="freeze" attributeName="height" begin="0.8s" dur="0.6s" values="0;5"></animate></rect></g></svg></a>
+			</div>
 		</div>
 		
 		<div class="tab-content-2" style="display:none;">
-			<h4 class="w3-margin-top w3-margin-bottom">Installation:</h4>
-			<p>In your theme\'s header, replace: <span class="tpl">&lt;?php get_header(); ?></span> with: <span class="tpl">&lt;?php get_seoheader(); ?></span></p>
+			<h4 class="w3-margin-top w3-margin-bottom">' . i18n_r('BetterSEO/LANG_Installation') . ':</h4>
+			<p>' . i18n_r('BetterSEO/LANG_Installation_Text') . '</p>
 			
 			<hr>
 			
-			<h4 class="w3-margin-top w3-margin-bottom">Info:</h4>
+			<h4 class="w3-margin-top w3-margin-bottom">' . i18n_r('BetterSEO/LANG_Info') . ':</h4>
 			<ul>
 				<li><a href="https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data" target="_blank">Google Structured Data</a></li>
 				<li><a href="https://developers.facebook.com/docs/sharing/webmasters/" target="_blank">Facebook Open Graph</a></li>
@@ -1070,10 +1137,15 @@ function betterSEO()
 			
 			<hr>
 			
-			<h4 class="w3-margin-top w3-margin-bottom">Whats New:</h4>
+			<h4 class="w3-margin-top w3-margin-bottom">' . i18n_r('BetterSEO/LANG_Whats_New') . ':</h4>
+			<p>
+				<b>v3.6</b><br>
+				added i18n language files<br>
+				minor fixes
+			</p>
 			<p>
 				<b>v3.5</b><br>
-				add split hour option in JSON-LD
+				added split-hour option in JSON-LD
 			</p>
 			<p>
 				<b>v3.4</b><br>
@@ -1085,10 +1157,6 @@ function betterSEO()
 				added JSON-LD structured data markup for Google<br>
 				added Twitter/X Card<br>
 				added Apple Web App Tags<br>
-				minor fixes
-			</p>
-			<p>
-				<b>v3.2</b><br>
 				minor fixes
 			</p>
 		</div>
@@ -1106,7 +1174,7 @@ function betterSEO()
 					i.style.display = "none";
 				});
 				this.classList.add("tab-item-active");
-				if (this.textContent.trim() === "Setup") {
+				if (this.id === "tab1") {
 					document.querySelector(".tab-content-1").style.display = "block";
 				} else {
 					document.querySelector(".tab-content-2").style.display = "block";
@@ -1484,7 +1552,8 @@ function betterSEO()
 }
 
 function generateBusinessHoursFields() {
-	$days = [
+	// JSON-LD output (DO NOT TRANSLATE)
+	$day_codes = [
 		'Mo' => 'Monday',
 		'Tu' => 'Tuesday', 
 		'We' => 'Wednesday',
@@ -1493,7 +1562,18 @@ function generateBusinessHoursFields() {
 		'Sa' => 'Saturday',
 		'Su' => 'Sunday'
 	];
-
+	
+	// Translations for the admin UI
+	$day_labels = [
+		'Mo' => i18n_r('BetterSEO/LANG_Monday'),
+		'Tu' => i18n_r('BetterSEO/LANG_Tuesday'), 
+		'We' => i18n_r('BetterSEO/LANG_Wednesday'),
+		'Th' => i18n_r('BetterSEO/LANG_Thursday'),
+		'Fr' => i18n_r('BetterSEO/LANG_Friday'),
+		'Sa' => i18n_r('BetterSEO/LANG_Saturday'),
+		'Su' => i18n_r('BetterSEO/LANG_Sunday')
+	];
+	
 	// Load existing JSON-LD data to pre-fill values
 	$jsonldData = [];
 	$jsonldcodefile = GSDATAOTHERPATH . 'betterSEO/jsonldcode.json';
@@ -1503,7 +1583,7 @@ function generateBusinessHoursFields() {
 	}
 
 	$html = '';
-	foreach ($days as $code => $day) {
+	foreach ($day_codes as $code => $day_name) {
 		$isChecked = false;
 		$timeSlots = [];
 		
@@ -1515,7 +1595,7 @@ function generateBusinessHoursFields() {
 					foreach ($spec['dayOfWeek'] as $dayOfWeek) {
 						// Handle both full day names and shortened versions
 						$normalizedDayOfWeek = strtolower(preg_replace('/https?:\/\/schema\.org\//', '', $dayOfWeek));
-						$normalizedCurrentDay = strtolower($day);
+						$normalizedCurrentDay = strtolower($day_name);
 						
 						if ($normalizedDayOfWeek === $normalizedCurrentDay || 
 							strpos($normalizedDayOfWeek, $normalizedCurrentDay) !== false ||
@@ -1540,7 +1620,7 @@ function generateBusinessHoursFields() {
 		$html .= '
 		<label style="display: block; margin-bottom: 20px;">
 			<input type="checkbox" name="day[]" value="' . $code . '" class="dow"' . ($isChecked ? ' checked' : '') . '>
-			' . $day . '
+			' . $day_labels[$code] . '
 			<div id="time-container-' . $code . '" class="time-container" style="' . ($isChecked ? 'display: block;' : 'display: none;') . '">
 				<div id="time-slots-' . $code . '">';
 		
@@ -1550,7 +1630,7 @@ function generateBusinessHoursFields() {
 				<div class="time-slot" style="margin-bottom: 10px;">
 					<div class="time-row">
 						<div class="time-col">
-							<label>Open</label>
+							<label>' . i18n_r('BetterSEO/LANG_Open') . '</label>
 							<select name="' . $code . '_open[]" class="seoguy-select">';
 			
 			// Generate open time options with selected value
@@ -1559,7 +1639,7 @@ function generateBusinessHoursFields() {
 			$html .= '</select>
 						</div>
 						<div class="time-col">
-							<label>Close</label>
+							<label>' . i18n_r('BetterSEO/LANG_Close') . '</label>
 							<select name="' . $code . '_close[]" class="seoguy-select">';
 			
 			// Generate close time options with selected value
