@@ -3,7 +3,7 @@
 $i18n = array(
 
 	'LANG_Title'			=>	'BetterSEO 🌐',
-	'LANG_Description'		=>	'Improving GetSimple CMS SEO!',
+	'LANG_Description'		=>	'Making SEO for Get Simple CMS better!',
 	'LANG_Settings'			=>	'BetterSEO Settings 🌐',
 	
 	'LANG_Setup'			=>	'Setup',
