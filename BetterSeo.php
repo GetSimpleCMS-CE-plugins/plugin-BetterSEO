@@ -839,7 +839,7 @@ function betterSEO()
 
 							<option value="AnimalShelter"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AnimalShelter' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AnimalShelter') . '</option>
 
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Automotive') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Automotive') . '">
 								<option value="AutomotiveBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutomotiveBusiness' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AutomotiveBusiness') . '</option>
 								<option value="AutoBodyShop"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutoBodyShop' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AutoBodyShop') . '</option>
 								<option value="AutoDealer"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutoDealer' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AutoDealer') . '</option>
@@ -855,7 +855,7 @@ function betterSEO()
 							<option value="ChildCare"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ChildCare' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_ChildCare') . '</option>
 							<option value="DryCleaningOrLaundry"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'DryCleaningOrLaundry' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_DryCleaningOrLaundry') . '</option>
 							
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Emergency') . 'Emergency">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Emergency') . 'Emergency">
 								<option value="EmergencyService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'EmergencyService' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_EmergencyService') . '</option>
 								<option value="FireStation"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'FireStation' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_FireStation') . '</option>
 								<option value="Hospital"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Hospital' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Hospital') . '</option>
@@ -864,7 +864,7 @@ function betterSEO()
 
 							<option value="EmploymentAgency"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'EmploymentAgency' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_EmploymentAgency') . '</option>
 
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Entertainment') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Entertainment') . '">
 								<option value="EntertainmentBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'EntertainmentBusiness' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_EntertainmentBusiness') . '</option>
 								<option value="AdultEntertainment"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AdultEntertainment' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AdultEntertainment') . '</option>
 								<option value="AmusementPark"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AmusementPark' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AmusementPark') . '</option>
@@ -875,7 +875,7 @@ function betterSEO()
 								<option value="NightClub"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'NightClub' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_NightClub') . '</option>
 							</optgroup>
 
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Financial') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Financial') . '">
 								<option value="FinancialService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'FinancialService' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_FinancialService') . '</option>
 								<option value="AccountingService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AccountingService' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AccountingService') . '</option>
 								<option value="AutomatedTeller"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'AutomatedTeller' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_AutomatedTeller') . '</option>
@@ -883,7 +883,7 @@ function betterSEO()
 								<option value="InsuranceAgency"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'InsuranceAgency' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_InsuranceAgency') . '</option>
 							</optgroup>
 
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Food_Drink') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Food_Drink') . '">
 								<option value="FoodEstablishment"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'FoodEstablishment' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_FoodEstablishment') . '</option>
 								<option value="Bakery"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Bakery' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Bakery') . '</option>
 								<option value="BarOrPub"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BarOrPub' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_BarOrPub') . '</option>
@@ -898,12 +898,12 @@ function betterSEO()
 								<option value="LiquorStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'LiquorStore' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_LiquorStore') . '</option>
 							</optgroup>
 							
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Government') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Government') . '">
 								<option value="GovernmentOffice"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'GovernmentOffice' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_GovernmentOffice') . '</option>
 								<option value="PostOffice"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'PostOffice' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_PostOffice') . '</option>
 							</optgroup>
 							
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Health_Beauty') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Health_Beauty') . '">
 								<option value="HealthAndBeautyBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HealthAndBeautyBusiness' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_HealthAndBeautyBusiness') . '</option>
 								<option value="BeautySalon"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BeautySalon' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_BeautySalon') . '</option>
 								<option value="DaySpa"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'DaySpa' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_DaySpa') . '</option>
@@ -913,7 +913,7 @@ function betterSEO()
 								<option value="TattooParlor"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'TattooParlor' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_TattooParlor') . '</option>
 							</optgroup>
 							
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Home_Construction') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Home_Construction') . '">
 								<option value="HomeAndConstructionBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'HomeAndConstructionBusiness' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_HomeAndConstructionBusiness') . '</option>
 								<option value="Electrician"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Electrician' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Electrician') . '</option>
 								<option value="GeneralContractor"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'GeneralContractor' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_GeneralContractor') . '</option>
@@ -928,7 +928,7 @@ function betterSEO()
 							
 							<option value="InternetCafe"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'InternetCafe' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_InternetCafe') . '</option>
 							
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Legal') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Legal') . '">
 								<option value="LegalService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'LegalService' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_LegalService') . '</option>
 								<option value="Attorney"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Attorney' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Attorney') . '</option>
 								<option value="Notary"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Notary' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Notary') . '</option>
@@ -936,7 +936,7 @@ function betterSEO()
 							
 							<option value="Library"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Library' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Library') . '</option>
 								
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Lodging') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Lodging') . '">
 								<option value="LodgingBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'LodgingBusiness' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_LodgingBusiness') . '</option>
 								<option value="BedAndBreakfast"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BedAndBreakfast' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_BedAndBreakfast') . '</option>
 								<option value="Campground"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Campground' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Campground') . '</option>
@@ -946,7 +946,7 @@ function betterSEO()
 								<option value="Resort"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Resort' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Resort') . '</option>
 							</optgroup>
 							
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Medical') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Medical') . '">
 								<option value="MedicalBusiness"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'MedicalBusiness' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_MedicalBusiness') . '</option>
 								<option value="Dentist"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Dentist' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Dentist') . '</option>
 								<option value="DiagnosticLab"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'DiagnosticLab' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_DiagnosticLab') . '</option>
@@ -956,12 +956,12 @@ function betterSEO()
 								<option value="VeterinaryCare"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'VeterinaryCare' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_VeterinaryCare') . '</option>
 							</optgroup>
 	
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Professional_Services') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Professional_Services') . '">
 								<option value="Photographer"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Photographer' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Photographer') . '</option>
 								<option value="ProfessionalService"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'ProfessionalService' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_ProfessionalService') . '</option>
 							</optgroup>
 
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Real_Estate') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Real_Estate') . '">
 								<option value="RealEstateAgent"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'RealEstateAgent' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_RealEstateAgent') . '</option>
 							</optgroup>
 
@@ -970,7 +970,7 @@ function betterSEO()
 							<option value="SelfStorage"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'SelfStorage' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_SelfStorage') . '</option>
 							<option value="SportsActivityLocation"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'SportsActivityLocation' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_SportsActivityLocation') . '</option>
 							
-							<optgroup label="• ' . i18n_r('BetterSEO/LANG_Shopping') . '">
+							<optgroup label="â€¢ ' . i18n_r('BetterSEO/LANG_Shopping') . '">
 								<option value="Store"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'Store' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_Store') . '</option>
 								<option value="BikeStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BikeStore' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_BikeStore') . '</option>
 								<option value="BookStore"' . (isset($jsonldData['@type']) && $jsonldData['@type'] == 'BookStore' ? ' selected' : '') . '>' . i18n_r('BetterSEO/LANG_BookStore') . '</option>
