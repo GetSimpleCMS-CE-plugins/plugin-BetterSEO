@@ -1,6 +1,6 @@
 <?php
 
-$i18n = array(
+$i18n = [
 
 	'LANG_Title'			=>	'BetterSEO 🌐',
 	'LANG_Description'		=>	'Improving GetSimple CMS SEO!',
@@ -230,6 +230,7 @@ $i18n = array(
 	'LANG_Whats_New' 		=>	'What\'s New',
 	
 	'LANG_PayPal'			=>	'Buy Us A Coffee',
+	
 	'LANG_xxx'				=>	'xXx',
 
-);
+];
