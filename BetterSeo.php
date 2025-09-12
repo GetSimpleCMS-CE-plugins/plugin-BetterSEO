@@ -10,7 +10,7 @@ i18n_merge('BetterSeo') || i18n_merge('BetterSeo', 'en_US');
 register_plugin(
 	$thisfile, 		//Plugin id
 	i18n_r('BetterSeo/LANG_Title'),	//Plugin name
-	'3.8', 			//Plugin version
+	'3.9', 			//Plugin version
 	'CE Team', 		//Plugin author
 	'https://getsimple-ce.ovh/donate', //author website
 	i18n_r('BetterSeo/LANG_Description'), //Plugin description
@@ -175,12 +175,20 @@ function get_seoheader($full = true) {
 	if (file_exists($twittercheckfile) && file_get_contents($twittercheckfile) !== '') {
 		$seo .= '	<!-- Twitter/X Card
 		=================================================== -->
+		<meta name="twitter:card" content="summary_large_image">';
+		
+		//if (!empty($twitterfile)) {
+		if (file_exists($twitterfile) && file_get_contents($twitterfile) !== '') {
+			$seo .= '
+		<meta name="twitter:site" content="' . (file_exists($twitterfile) ? file_get_contents($twitterfile) : '') . '" />';
+		}
+		
+		$seo .= '
 		<meta name="twitter:title" content="' . $newSeoTitle . '">
 		<meta name="twitter:description" content="' . descSeo() . '">';
 		
 		if (!empty($imageseo)) {
 			$seo .= '
-		<meta name="twitter:image" content="' . $imageseo . '">
 		<meta name="twitter:card" content="' . $imageseo . '">';
 		}
 		
@@ -793,6 +801,11 @@ function betterSEO() {
 						<span class="checkbox-circle"></span>
 					</div>
 				</label>
+				
+				<div id="twitter-div">
+					<p>' . i18n_r('BetterSeo/LANG_Twitter_Username') . ':</p>
+					<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="twitter" placeholder="@YourTwitterUsername" value="' . (file_exists($twitterfile) ? file_get_contents($twitterfile) : '') . '">
+				</div>
 
 				<hr>
 				
@@ -1135,6 +1148,10 @@ function betterSEO() {
 			
 			<h4 class="w3-margin-top w3-margin-bottom">' . i18n_r('BetterSeo/LANG_Whats_New') . ':</h4>
 			<p>
+				<b>v3.9</b><br>
+				added optional username for Twitter Card
+			</p>
+			<p>
 				<b>v3.8</b><br>
 				Fix typo breaking language keys
 			</p>
@@ -1201,6 +1218,23 @@ function betterSEO() {
 
 			toggleJsonldDiv();
 			checkbox.addEventListener("change", toggleJsonldDiv);
+		});
+		
+		// Toggle Twitter block 
+		document.addEventListener("DOMContentLoaded", function() {
+			const checkbox = document.querySelector(\'input[name="twittercheck"]\');
+			const twitterDiv = document.getElementById("twitter-div");
+
+			function toggleTwitterDiv() {
+				if (checkbox.checked) {
+					twitterDiv.style.display = "block";
+				} else {
+					twitterDiv.style.display = "none";
+				}
+			}
+
+			toggleTwitterDiv();
+			checkbox.addEventListener("change", toggleTwitterDiv);
 		});
 		
 		// Toggle GEO block 
@@ -1393,6 +1427,8 @@ function betterSEO() {
 		// Twitter
 		$twittercheck = isset($_POST['twittercheck']) ? 'on' : '';
 		file_put_contents($twittercheckfile, $twittercheck);
+		$twitter = $_POST['twitter'] ?? '';
+		file_put_contents($twitterfile, $twitter);
 
 		// Apple
 		$applecheck = isset($_POST['applecheck']) ? 'on' : '';

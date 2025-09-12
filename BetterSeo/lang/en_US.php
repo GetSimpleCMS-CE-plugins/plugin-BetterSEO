@@ -33,6 +33,7 @@ $i18n = [
 	
 	'LANG_Twitter'			=>	'Twitter/X Card',
 	'LANG_Twitter_Text'		=>	'When being shared on Twitter/X, these tags help you control the preview.',
+	'LANG_Twitter_Username'	=>	'Twitter Username (optional)',
 	
 	'LANG_Apple'			=>	'Apple Web App Tags',
 	'LANG_Apple_Text'		=>	'Enhance the iOS/PWA mobile experience.',

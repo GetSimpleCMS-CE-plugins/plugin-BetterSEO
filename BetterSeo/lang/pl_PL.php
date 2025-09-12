@@ -33,6 +33,7 @@ $i18n = [
 	
 	'LANG_Twitter'			=>	'Karta Twitter/X',
 	'LANG_Twitter_Text'		=>	'Podczas udostępniania na Twitter/X, te tagi pomagają kontrolować podgląd.',
+	'LANG_Twitter_Username'	=>	'Nazwa użytkownika na Twitterze (opcjonalnie)',
 	
 	'LANG_Apple'			=>	'Tagi Apple Web App',
 	'LANG_Apple_Text'		=>	'Ulepsz doświadczenie na iOS/PWA.',

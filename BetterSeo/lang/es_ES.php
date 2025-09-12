@@ -33,6 +33,7 @@ $i18n = [
 	
 	'LANG_Twitter'			=>	'Tarjeta Twitter/X',
 	'LANG_Twitter_Text'		=>	'Al compartir en Twitter/X, estas etiquetas te ayudan a controlar la vista previa.',
+	'LANG_Twitter_Username'	=>	'Nombre de usuario de Twitter (opcional)',
 	
 	'LANG_Apple'			=>	'Etiquetas Apple Web App',
 	'LANG_Apple_Text'		=>	'Mejora la experiencia en iOS/PWA.',
