@@ -175,12 +175,12 @@ function get_seoheader($full = true) {
 	if (file_exists($twittercheckfile) && file_get_contents($twittercheckfile) !== '') {
 		$seo .= '	<!-- Twitter/X Card
 		=================================================== -->
+		<meta name="twitter:card" content="summary_large_image">;
 		<meta name="twitter:title" content="' . $newSeoTitle . '">
 		<meta name="twitter:description" content="' . descSeo() . '">';
 		
 		if (!empty($imageseo)) {
 			$seo .= '
-		<meta name="twitter:image" content="' . $imageseo . '">
 		<meta name="twitter:card" content="' . $imageseo . '">';
 		}
 		
