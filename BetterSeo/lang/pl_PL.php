@@ -234,4 +234,17 @@ $i18n = [
 	
 	'LANG_xxx'				=>	'xXx',
 
+	'LANG_Site_Verification'		=>	'Weryfikacja wyszukiwarek',
+	'LANG_Site_Verification_Text'	=>	'Wklej tylko kod weryfikacyjny podany przez każdą konsolę (nie cały znacznik &lt;meta&gt;).',
+	'LANG_Google_Verification'		=>	'Google Search Console',
+	'LANG_Bing_Verification'		=>	'Bing Webmaster Tools',
+
+	'LANG_PagePanel_Title'	=>	'Opcje SEO dla tej strony',
+	'LANG_Noindex'			=>	'Ukryj tę stronę przed wyszukiwarkami (noindex)',
+	'LANG_Nofollow'			=>	'Nie podążaj za linkami na tej stronie (nofollow)',
+
+	'LANG_Serp_Preview'				=>	'Podgląd wyniku wyszukiwania',
+	'LANG_Serp_Title_Placeholder'		=>	'Tutaj pojawi się tytuł strony',
+	'LANG_Serp_Desc_Placeholder'		=>	'Tutaj pojawi się metaopis',
+
 ];

@@ -10,7 +10,7 @@ i18n_merge('BetterSeo') || i18n_merge('BetterSeo', 'en_US');
 register_plugin(
 	$thisfile, 		//Plugin id
 	i18n_r('BetterSeo/LANG_Title'),	//Plugin name
-	'3.9', 			//Plugin version
+	'4.0', 			//Plugin version
 	'CE Team', 		//Plugin author
 	'https://getsimple-ce.ovh/donate', //author website
 	i18n_r('BetterSeo/LANG_Description'), //Plugin description
@@ -23,7 +23,237 @@ register_plugin(
 # add a link in the admin tab 'theme'
 add_action('plugins-sidebar', 'createSideMenu', array($thisfile, i18n_r('BetterSeo/LANG_Settings')));
 
+# per-page SEO controls (robots + Article schema) on the Edit Page screen
+add_action('edit-extras', 'BetterSeo_edit_panel');
+add_action('changedata-save', 'BetterSeo_save_page_meta');
+
 # functions
+
+if (!function_exists('descSeo')) {
+	function descSeo() {
+		if (get_page_meta_desc($echo = false) == '') {
+			global $content;
+			$desc = strip_decode($content);
+			$desc = exec_filter('content', $desc); // process plugin shortcodes
+			if (getDef('GSCONTENTSTRIP', true))
+			$desc = strip_content($desc);
+			$desc = cleanHtml($desc, ['style', 'script']); // remove unwanted elements that strip_tags fails to remove
+			$desc = getExcerpt($desc, 160); // grab 160 chars
+			$desc = strip_whitespace($desc); // remove newlines, tab chars
+			$desc = str_replace('"', '', $desc); // remove double quotes
+			$desc = encode_quotes($desc);
+			$desc = trim($desc);
+			return $desc;
+		} else {
+			return get_page_meta_desc($echo = false);
+		}
+	}
+}
+
+if (!function_exists('descJSON')) {
+	function descJSON() {
+		if (get_page_meta_desc($echo = false) == '') {
+			global $content;
+			$desc2 = strip_decode($content);
+			$desc2 = exec_filter('content', $desc2); // process plugin shortcodes
+			if (getDef('GSCONTENTSTRIP', true))
+			$desc2 = strip_content($desc2);
+			$desc2 = cleanHtml($desc2, ['style', 'script']); // remove unwanted elements that strip_tags fails to remove
+			$desc2 = getExcerpt($desc2, 860); // grab 860 chars
+			$desc2 = strip_whitespace($desc2); // remove newlines, tab chars
+			$desc2 = trim($desc2);
+			return $desc2;
+		} else {
+			return get_page_meta_desc($echo = false);
+		}
+	}
+}
+
+// Safely escape a raw value for interpolation inside the hand-built JSON-LD
+if (!function_exists('betterseo_json_str')) {
+	function betterseo_json_str($value) {
+		$json = json_encode((string) $value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$inner = substr($json, 1, -1);
+		return str_replace('</', '<\/', $inner);
+	}
+}
+
+// Per-page SEO data (robots directives + Article schema toggle)
+if (!function_exists('BetterSeo_page_meta_path')) {
+	function BetterSeo_page_meta_path($slug) {
+		return GSDATAOTHERPATH . 'betterSEO/pages/' . $slug . '.json';
+	}
+}
+
+if (!function_exists('BetterSeo_get_page_meta')) {
+	function BetterSeo_get_page_meta($slug) {
+		if ($slug === '') return [];
+		$file = BetterSeo_page_meta_path($slug);
+		if (!file_exists($file)) return [];
+		$decoded = json_decode(file_get_contents($file), true);
+		return is_array($decoded) ? $decoded : [];
+	}
+}
+
+// Renders the checkboxes on the Edit Page screen (hooked to 'edit-extras')
+if (!function_exists('BetterSeo_edit_panel')) {
+	function BetterSeo_edit_panel() {
+		global $SITEURL;
+		$slug = isset($_GET['id']) ? $_GET['id'] : '';
+		$pagedata = BetterSeo_get_page_meta($slug);
+
+		$noindex  = !empty($pagedata['noindex']);
+		$nofollow = !empty($pagedata['nofollow']);
+		// Description fallback for the preview: reuses descJSON().
+		global $metad, $content;
+		$betterseo_desc_fallback = '';
+		try {
+			if (trim((string) $metad) !== '') {
+				$betterseo_desc_fallback = trim((string) $metad);
+			} elseif (function_exists('exec_filter') && function_exists('getExcerpt') && function_exists('cleanHtml')) {
+				$desc2 = (string) $content;
+				$desc2 = function_exists('strip_decode') ? strip_decode($desc2) : html_entity_decode($desc2, ENT_QUOTES, 'UTF-8');
+				$desc2 = exec_filter('content', $desc2);
+				if (!function_exists('getDef') || getDef('GSCONTENTSTRIP', true)) {
+					$desc2 = strip_tags($desc2);
+				}
+				$desc2 = cleanHtml($desc2, ['style', 'script']);
+				$desc2 = getExcerpt($desc2, 860);
+				$desc2 = trim(preg_replace('/\s+/', ' ', $desc2));
+				$betterseo_desc_fallback = $desc2;
+			}
+		} catch (\Throwable $e) {
+			$betterseo_desc_fallback = '';
+		}
+
+		// Static OG image preview, same setting/gate get_seoheader() uses.
+		$betterseo_preview_image = '';
+		$folder = GSDATAOTHERPATH . 'betterSEO/';
+		$betterseo_facebookcheckfile = $folder . 'facebookcheck.txt';
+		$betterseo_fbimagefile = $folder . 'fbimage.txt';
+		if (file_exists($betterseo_facebookcheckfile) && file_get_contents($betterseo_facebookcheckfile) !== ''
+			&& file_exists($betterseo_fbimagefile) && file_get_contents($betterseo_fbimagefile) !== '') {
+			$betterseo_preview_image = file_get_contents($betterseo_fbimagefile);
+		}
+		?>
+		
+		<style>
+		#metadata_window .bseo-align input{width:auto;}
+		#metadata_window .bseo-align p{margin-left:20px;}
+		</style>
+		<div class="clear"></div>
+		<div class="rightopt bseo-align" style="width:50%;">
+			<!--h4 style="margin-top:15px;"><?php echo i18n_r('BetterSeo/LANG_PagePanel_Title'); ?></h4-->
+			
+			<p class="inline clearfix">
+				<input type="checkbox" id="betterseo_noindex" name="betterseo_noindex"<?php echo $noindex ? ' checked="checked"' : ''; ?> />&nbsp;&nbsp;&nbsp;
+				<label for="betterseo_noindex"><?php echo i18n_r('BetterSeo/LANG_Noindex'); ?></label>
+			</p>
+			<p class="inline clearfix">
+				<input type="checkbox" id="betterseo_nofollow" name="betterseo_nofollow"<?php echo $nofollow ? ' checked="checked"' : ''; ?> />&nbsp;&nbsp;&nbsp;
+				<label for="betterseo_nofollow"><?php echo i18n_r('BetterSeo/LANG_Nofollow'); ?></label>
+			</p>
+		</div>
+
+		<div class="clear"></div>
+		<div style="width:100%;box-sizing:border-box;padding-top:10px;">
+			<details class="bseo-serp-details">
+				<summary style="cursor:pointer;font-weight:bold;padding:8px 0;"><?php echo i18n_r('BetterSeo/LANG_Serp_Preview'); ?></summary>
+				<div id="bseo-serp-preview" style="border:1px solid #ddd;border-radius:8px;padding:15px 20px;margin:10px 0;background:#fff;font-family:arial,sans-serif;max-width:600px;">
+					<div id="bseo-serp-url" style="color:#202124;font-size:14px;line-height:1.3;"></div>
+					<div id="bseo-serp-title" style="color:#1a0dab;font-size:20px;line-height:1.3;margin:2px 0;overflow-wrap:break-word;"></div>
+					<div style="display:flex;gap:12px;align-items:flex-start;">
+						<div id="bseo-serp-desc" style="color:#4d5156;font-size:14px;line-height:1.4;overflow-wrap:break-word;flex:1;"></div>
+						<img id="bseo-serp-image" style="display:none;width:80px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;" alt="" />
+					</div>
+				</div>
+			</details>
+		</div>
+
+		<script>
+		(function () {
+			var titleInput = document.getElementById('post-title');
+			var descInput  = document.getElementById('post-metad');
+			var slugInput  = document.getElementById('post-id');
+
+			var serpUrl   = document.getElementById('bseo-serp-url');
+			var serpTitle = document.getElementById('bseo-serp-title');
+			var serpDesc  = document.getElementById('bseo-serp-desc');
+			var serpImage = document.getElementById('bseo-serp-image');
+			if (!serpUrl || !serpTitle || !serpDesc) return;
+
+			var siteBase = <?php echo json_encode(rtrim($SITEURL, '/')); ?>;
+			var titlePlaceholder = <?php echo json_encode(i18n_r('BetterSeo/LANG_Serp_Title_Placeholder')); ?>;
+			var descFallback = <?php echo json_encode($betterseo_desc_fallback); ?>;
+			var descPlaceholder = <?php echo json_encode(i18n_r('BetterSeo/LANG_Serp_Desc_Placeholder')); ?>;
+			var previewImage = <?php echo json_encode($betterseo_preview_image); ?>;
+
+			if (serpImage && previewImage) {
+				serpImage.src = previewImage;
+				serpImage.style.display = '';
+			}
+
+			function truncate(str, len) {
+				if (!str) return '';
+				return str.length > len ? str.substring(0, len - 1) + '\u2026' : str;
+			}
+
+			function updatePreview() {
+				var title = titleInput ? titleInput.value : '';
+				var desc  = descInput ? descInput.value : '';
+				var slug  = slugInput ? slugInput.value : '';
+
+				var displayUrl = siteBase.replace(/^https?:\/\//, '');
+				if (slug) displayUrl += '/' + slug;
+
+				serpUrl.textContent = displayUrl;
+				serpTitle.textContent = truncate(title, 60) || titlePlaceholder;
+				serpDesc.textContent = truncate(desc, 155) || truncate(descFallback, 155) || descPlaceholder;
+			}
+
+			[titleInput, descInput, slugInput].forEach(function (el) {
+				if (el) el.addEventListener('input', updatePreview);
+			});
+
+			updatePreview();
+		})();
+		</script>
+		<?php
+	}
+}
+
+// Persists the checkboxes above (hooked to 'changedata-save', in changedata.php
+if (!function_exists('BetterSeo_save_page_meta')) {
+	function BetterSeo_save_page_meta() {
+		global $url, $existingurl;
+		if (empty($url)) return;
+
+		$pagefolder = GSDATAOTHERPATH . 'betterSEO/pages/';
+		if (!is_dir($pagefolder)) {
+			mkdir($pagefolder, 0755, true);
+		}
+		// Protect the folder even if the plugin's own sitewide settings have.
+		$parentHtaccess = GSDATAOTHERPATH . 'betterSEO/.htaccess';
+		if (!file_exists($parentHtaccess)) {
+			file_put_contents($parentHtaccess, "Require all denied\n");
+		}
+
+		$pagedata = [
+			'noindex'  => isset($_POST['betterseo_noindex']),
+			'nofollow' => isset($_POST['betterseo_nofollow']),
+		];
+
+		file_put_contents(BetterSeo_page_meta_path($url), json_encode($pagedata));
+
+		// Clean up the old sidecar file if the page's slug just changed
+		if (!empty($existingurl) && $existingurl !== $url) {
+			$oldfile = BetterSeo_page_meta_path($existingurl);
+			if (file_exists($oldfile)) {
+				unlink($oldfile);
+			}
+		}
+	}
+}
 
 function get_seoheader($full = true) {
 	///file
@@ -54,6 +284,17 @@ function get_seoheader($full = true) {
 
 	$homepagetitlefile = $folder . 'homepagetitle.txt';
 
+	$googleverifyfile = $folder . 'googleverify.txt';
+	$bingverifyfile = $folder . 'bingverify.txt';
+
+	// Per-page overrides (robots directives + Article schema toggle), set on the Edit Page screen
+	$betterseo_pagemeta = BetterSeo_get_page_meta(return_page_slug());
+	$betterseo_robots_index  = !empty($betterseo_pagemeta['noindex'])  ? 'noindex'  : 'index';
+	$betterseo_robots_follow = !empty($betterseo_pagemeta['nofollow']) ? 'nofollow' : 'follow';
+
+	// og:type / DC.Type: "website" for the homepage, "article" for every other page
+	$betterseo_content_type = (return_page_slug() == 'index') ? 'website' : 'article';
+
 	///
 	$homepagetitle = file_exists($homepagetitlefile) ? file_get_contents($homepagetitlefile) : 'normal';
 	
@@ -77,42 +318,6 @@ function get_seoheader($full = true) {
 		};
 	}
 
-	function descSeo() {
-		if (get_page_meta_desc($echo = false) == '') {
-			global $content;
-			$desc = strip_decode($content);
-			if (getDef('GSCONTENTSTRIP', true))
-			$desc = strip_content($desc);
-			$desc = cleanHtml($desc, ['style', 'script']); // remove unwanted elements that strip_tags fails to remove
-			$desc = getExcerpt($desc, 160); // grab 160 chars
-			$desc = strip_whitespace($desc); // remove newlines, tab chars
-			$desc = str_replace('"', '', $desc); // remove double quotes
-			$desc = encode_quotes($desc);
-			$desc = trim($desc);
-			return $desc;
-		} else {
-			return get_page_meta_desc($echo = false);
-		}
-	}
-
-	function descJSON() {
-		if (get_page_meta_desc($echo = false) == '') {
-			global $content;
-			$desc2 = strip_decode($content);
-			if (getDef('GSCONTENTSTRIP', true))
-			$desc2 = strip_content($desc2);
-			$desc2 = cleanHtml($desc2, ['style', 'script']); // remove unwanted elements that strip_tags fails to remove
-			$desc2 = getExcerpt($desc2, 860); // grab 860 chars
-			$desc2 = strip_whitespace($desc2); // remove newlines, tab chars
-			$desc2 = str_replace('"', '', $desc2); // remove double quotes
-			$desc2 = encode_quotes($desc2);
-			$desc2 = trim($desc2);
-			return $desc2;
-		} else {
-			return get_page_meta_desc($echo = false);
-		}
-	}
-
 	$seo = '	<!-- Basic Header Needs
 		================================================== -->
 		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no" />
@@ -120,12 +325,27 @@ function get_seoheader($full = true) {
 		<base href="' . get_site_url($echo = false) . '">
 		<title>' . $newSeoTitle . '</title>
 		<meta name="description" content="' . descSeo() . '">
-		<meta name="robots" content="index, follow">
+		<meta name="robots" content="' . $betterseo_robots_index . ', ' . $betterseo_robots_follow . '">
 		<meta name="copyright" content="' . get_site_name($echo = false) . '">
 		<meta http-equiv="last-modified" content="' . get_page_date('D, j M Y G:i:s', $echo = false) . ' GMT">
 		<link rel="canonical" href="' . get_page_url($echo = true) . '">
 		
 	';
+	
+	if ((file_exists($googleverifyfile) && file_get_contents($googleverifyfile) !== '') || (file_exists($bingverifyfile) && file_get_contents($bingverifyfile) !== '')) {
+		$seo .= '	<!-- Search Engine Verification
+		================================================== -->
+	';
+		if (file_exists($googleverifyfile) && file_get_contents($googleverifyfile) !== '') {
+			$seo .= '	<meta name="google-site-verification" content="' . htmlspecialchars(file_get_contents($googleverifyfile), ENT_QUOTES) . '">
+	';
+		}
+		if (file_exists($bingverifyfile) && file_get_contents($bingverifyfile) !== '') {
+			$seo .= '	<meta name="msvalidate.01" content="' . htmlspecialchars(file_get_contents($bingverifyfile), ENT_QUOTES) . '">
+	
+	';
+		}
+	}
 	
 	if (file_exists($applecheckfile) && file_get_contents($applecheckfile) !== '') {
 		$seo .= '	<!-- Apple Web App Tags
@@ -156,7 +376,7 @@ function get_seoheader($full = true) {
 
 		$seo .= '	<!-- Facebook Open Graph protocol
 		=================================================== -->
-		<meta property="og:type" content="article">
+		<meta property="og:type" content="' . $betterseo_content_type . '">
 		<meta property="og:site_name" content="' . get_site_name($echo = false) . '">
 		<meta property="og:title" content="' . $newSeoTitle . '">
 		<meta property="og:description" content="' . descSeo() . '">
@@ -180,7 +400,7 @@ function get_seoheader($full = true) {
 		//if (!empty($twitterfile)) {
 		if (file_exists($twitterfile) && file_get_contents($twitterfile) !== '') {
 			$seo .= '
-		<meta name="twitter:site" content="' . (file_exists($twitterfile) ? file_get_contents($twitterfile) : '') . '" />';
+		<meta name="twitter:site" content="' . htmlspecialchars(file_exists($twitterfile) ? file_get_contents($twitterfile) : '', ENT_QUOTES) . '" />';
 		}
 		
 		$seo .= '
@@ -189,7 +409,7 @@ function get_seoheader($full = true) {
 		
 		if (!empty($imageseo)) {
 			$seo .= '
-		<meta name="twitter:card" content="' . $imageseo . '">';
+		<meta name="twitter:image" content="' . $imageseo . '">';
 		}
 		
 		$seo .= '
@@ -202,8 +422,8 @@ function get_seoheader($full = true) {
 		=================================================== -->
 		<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
 		<meta name="DC.Format" content="text/html" />
-		<meta name="DC.Type" content="article" />
-		<meta name="DC.Language" content="' . (file_exists($dublinfile) ? file_get_contents($dublinfile) : '') . '" />
+		<meta name="DC.Type" content="' . $betterseo_content_type . '" />
+		<meta name="DC.Language" content="' . htmlspecialchars(file_exists($dublinfile) ? file_get_contents($dublinfile) : '', ENT_QUOTES) . '" />
 		<meta name="DC.Title" content="' . get_page_clean_title($echo = false) . '" />
 		<meta name="DC.Creator" content="' . get_site_name($echo = false) . '"/>
 		<meta name="DC.Date" content="' . get_page_date('D, j M Y G:i:s', $echo = false) . ' GMT">
@@ -269,58 +489,58 @@ $seo .= '
 			$jsonldOutput = '
 {
   "@context": "https://schema.org",
-  "@type": "' . $jsonldData['@type'] . '"';
+  "@type": "' . betterseo_json_str($jsonldData['@type']) . '"';
 
 		// Add name property
 		if (isset($jsonldData['name'])) {
 			$jsonldOutput .= ',
-  "name": "' . addslashes($jsonldData['name']) . '"';
+  "name": "' . betterseo_json_str($jsonldData['name']) . '"';
 }
 
 $jsonldOutput .= ',
-  "url": "' . get_page_url(true) . '",
-  "description": "' . descJSON() . '"';
+  "url": "' . betterseo_json_str(get_page_url(true)) . '",
+  "description": "' . betterseo_json_str(descJSON()) . '"';
 		
 		// Add image if available
 		if (!empty($imageseo)) {
 			$jsonldOutput .= ',
-  "image": "' . $imageseo . '"';
+  "image": "' . betterseo_json_str($imageseo) . '"';
 		}
 		
 		if (isset($jsonldData['telephone'])) {
 			$jsonldOutput .= ',
-  "telephone": "' . $jsonldData['telephone'] . '"';
+  "telephone": "' . betterseo_json_str($jsonldData['telephone']) . '"';
 		}
 		
 		// Handle additional person properties
 		if (isset($jsonldData['gender'])) {
 			$jsonldOutput .= ',
-  "gender": "' . $jsonldData['gender'] . '"';
+  "gender": "' . betterseo_json_str($jsonldData['gender']) . '"';
 		}
 		
 		if (isset($jsonldData['nationality'])) {
 			$jsonldOutput .= ',
-  "nationality": "' . addslashes($jsonldData['nationality']) . '"';
+  "nationality": "' . betterseo_json_str($jsonldData['nationality']) . '"';
 		}
 		
 		if (isset($jsonldData['birthPlace'])) {
 			$jsonldOutput .= ',
-  "birthPlace": "' . addslashes($jsonldData['birthPlace']) . '"';
+  "birthPlace": "' . betterseo_json_str($jsonldData['birthPlace']) . '"';
 		}
 		
 		if (isset($jsonldData['birthDate'])) {
 			$jsonldOutput .= ',
-  "birthDate": "' . $jsonldData['birthDate'] . '"';
+  "birthDate": "' . betterseo_json_str($jsonldData['birthDate']) . '"';
 		}
 		
 		if (isset($jsonldData['jobTitle'])) {
 			$jsonldOutput .= ',
-  "jobTitle": "' . addslashes($jsonldData['jobTitle']) . '"';
+  "jobTitle": "' . betterseo_json_str($jsonldData['jobTitle']) . '"';
 		}
 		
 		if (isset($jsonldData['alumniOf'])) {
 			$jsonldOutput .= ',
-  "alumniOf": "' . addslashes($jsonldData['alumniOf']) . '"';
+  "alumniOf": "' . betterseo_json_str($jsonldData['alumniOf']) . '"';
 		}
 		
 		// Handle address
@@ -331,27 +551,27 @@ $jsonldOutput .= ',
 			
 			if (isset($jsonldData['address']['streetAddress'])) {
 				$jsonldOutput .= ',
-	"streetAddress": "' . addslashes($jsonldData['address']['streetAddress']) . '"';
+	"streetAddress": "' . betterseo_json_str($jsonldData['address']['streetAddress']) . '"';
 			}
 			
 			if (isset($jsonldData['address']['addressLocality'])) {
 				$jsonldOutput .= ',
-	"addressLocality": "' . addslashes($jsonldData['address']['addressLocality']) . '"';
+	"addressLocality": "' . betterseo_json_str($jsonldData['address']['addressLocality']) . '"';
 			}
 			
 			if (isset($jsonldData['address']['addressRegion'])) {
 				$jsonldOutput .= ',
-	"addressRegion": "' . addslashes($jsonldData['address']['addressRegion']) . '"';
+	"addressRegion": "' . betterseo_json_str($jsonldData['address']['addressRegion']) . '"';
 			}
 			
 			if (isset($jsonldData['address']['postalCode'])) {
 				$jsonldOutput .= ',
-	"postalCode": "' . $jsonldData['address']['postalCode'] . '"';
+	"postalCode": "' . betterseo_json_str($jsonldData['address']['postalCode']) . '"';
 			}
 			
 			if (isset($jsonldData['address']['addressCountry'])) {
 				$jsonldOutput .= ',
-	"addressCountry": "' . addslashes($jsonldData['address']['addressCountry']) . '"';
+	"addressCountry": "' . betterseo_json_str($jsonldData['address']['addressCountry']) . '"';
 			}
 			
 			$jsonldOutput .= '
@@ -366,12 +586,12 @@ $jsonldOutput .= ',
 			
 			if (isset($jsonldData['geo']['latitude'])) {
 				$jsonldOutput .= ',
-	"latitude": "' . $jsonldData['geo']['latitude'] . '"';
+	"latitude": "' . betterseo_json_str($jsonldData['geo']['latitude']) . '"';
 			}
 			
 			if (isset($jsonldData['geo']['longitude'])) {
 				$jsonldOutput .= ',
-	"longitude": "' . $jsonldData['geo']['longitude'] . '"';
+	"longitude": "' . betterseo_json_str($jsonldData['geo']['longitude']) . '"';
 			}
 			
 			$jsonldOutput .= '
@@ -381,12 +601,12 @@ $jsonldOutput .= ',
 		// Handle additional properties
 		if (isset($jsonldData['hasMap'])) {
 			$jsonldOutput .= ',
-  "hasMap": "' . $jsonldData['hasMap'] . '"';
+  "hasMap": "' . betterseo_json_str($jsonldData['hasMap']) . '"';
 		}
 		
 		if (isset($jsonldData['priceRange'])) {
 			$jsonldOutput .= ',
-  "priceRange": "' . $jsonldData['priceRange'] . '"';
+  "priceRange": "' . betterseo_json_str($jsonldData['priceRange']) . '"';
 		}
 		
 		// Handle opening hours specification
@@ -399,9 +619,9 @@ $jsonldOutput .= ',
 				$jsonldOutput .= '
 	{
 	  "@type": "OpeningHoursSpecification",
-	  "dayOfWeek": ["' . $spec['dayOfWeek'][0] . '"],
-	  "opens": "' . $spec['opens'] . '",
-	  "closes": "' . $spec['closes'] . '"
+	  "dayOfWeek": ["' . betterseo_json_str($spec['dayOfWeek'][0]) . '"],
+	  "opens": "' . betterseo_json_str($spec['opens']) . '",
+	  "closes": "' . betterseo_json_str($spec['closes']) . '"
 	}';
 				if ($index < $specCount - 1) {
 					$jsonldOutput .= ',';
@@ -422,6 +642,65 @@ $jsonldOutput .= ',
 
 ';
 		}
+	}
+
+	// Per-page Article schema (separate from the sitewide LocalBusiness/Organization/
+	// Person schema above - a page can have both, multiple JSON-LD blocks are valid)
+	if ($betterseo_content_type === 'article') {
+		$betterseo_pageslug = return_page_slug();
+		$betterseo_pagexml_path = GSDATAPAGESPATH . $betterseo_pageslug . '.xml';
+		$betterseo_pubdate = '';
+		$betterseo_author = '';
+		if (file_exists($betterseo_pagexml_path)) {
+			$betterseo_pagexml = @simplexml_load_file($betterseo_pagexml_path);
+			if ($betterseo_pagexml !== false) {
+				$betterseo_pubdate = (string) $betterseo_pagexml->pubDate;
+				$betterseo_author = (string) $betterseo_pagexml->author;
+			}
+		}
+
+		$articleOutput = '
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "' . betterseo_json_str(get_page_title($echo = false)) . '",
+  "description": "' . betterseo_json_str(descJSON()) . '",
+  "url": "' . betterseo_json_str(get_page_url(true)) . '"';
+
+		$betterseo_pubdate_iso = $betterseo_pubdate !== '' ? date('c', strtotime($betterseo_pubdate)) : '';
+		if ($betterseo_pubdate_iso !== '') {
+			$articleOutput .= ',
+  "datePublished": "' . betterseo_json_str($betterseo_pubdate_iso) . '",
+  "dateModified": "' . betterseo_json_str($betterseo_pubdate_iso) . '"';
+		}
+
+		if ($betterseo_author !== '') {
+			$articleOutput .= ',
+  "author": {
+	"@type": "Person",
+	"name": "' . betterseo_json_str($betterseo_author) . '"
+  }';
+		}
+
+		$articleOutput .= ',
+  "publisher": {
+	"@type": "Organization",
+	"name": "' . betterseo_json_str(get_site_name($echo = false)) . '"
+  }';
+
+		if (!empty($imageseo ?? '')) {
+			$articleOutput .= ',
+  "image": "' . betterseo_json_str($imageseo) . '"';
+		}
+
+		$articleOutput .= '
+}';
+
+		$seo .= '	<!-- Article Schema (per-page) -->
+<script type="application/ld+json">' . $articleOutput . '
+</script>
+
+';
 	}
 	
 	echo $seo;
@@ -465,6 +744,9 @@ function betterSEO() {
 	$jsonldcodefile = $folder . 'jsonldcode.json';
 
 	$homepagetitlefile = $folder . 'homepagetitle.txt';
+
+	$googleverifyfile = $folder . 'googleverify.txt';
+	$bingverifyfile = $folder . 'bingverify.txt';
 
 	// Load existing JSON-LD data
 	$jsonldData = [];
@@ -707,6 +989,7 @@ function betterSEO() {
 
 		<div class="tab-content-1">
 			<form method="post" class="seoguy">
+				<input type="hidden" name="nonce" value="' . get_nonce('save', '') . '">
 				
 				<h3>' . i18n_r('BetterSeo/LANG_Homepage_Title') . '</h3>
 
@@ -716,6 +999,17 @@ function betterSEO() {
 					<option value="titleonly">' . i18n_r('BetterSeo/LANG_Only_Website_Name') . '</option>
 				</select>
 				
+				<hr>
+
+				<h3>' . i18n_r('BetterSeo/LANG_Site_Verification') . '</h3>
+				<p class="leader">' . i18n_r('BetterSeo/LANG_Site_Verification_Text') . '</p>
+
+				<p>' . i18n_r('BetterSeo/LANG_Google_Verification') . ':</p>
+				<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="googleverify" placeholder="abc123..." value="' . htmlspecialchars(file_exists($googleverifyfile) ? file_get_contents($googleverifyfile) : '', ENT_QUOTES) . '">
+
+				<p>' . i18n_r('BetterSeo/LANG_Bing_Verification') . ':</p>
+				<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="bingverify" placeholder="abc123..." value="' . htmlspecialchars(file_exists($bingverifyfile) ? file_get_contents($bingverifyfile) : '', ENT_QUOTES) . '">
+
 				<hr>
 
 				<h3 style="margin-top:20px;">' . i18n_r('BetterSeo/LANG_Favicons') . '</h3>
@@ -742,7 +1036,7 @@ function betterSEO() {
 				
 				<div id="dublin-div">
 					<p>' . i18n_r('BetterSeo/LANG_Language_Code') . '</p>
-					<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="dublin" placeholder="en" value="' . (file_exists($dublinfile) ? file_get_contents($dublinfile) : '') . '">
+					<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="dublin" placeholder="en" value="' . htmlspecialchars(file_exists($dublinfile) ? file_get_contents($dublinfile) : '', ENT_QUOTES) . '">
 				</div>
 				
 				<hr>
@@ -760,7 +1054,7 @@ function betterSEO() {
 				</label>
 
 				<div id="geo-div">
-					<textarea name="geocode" style="height:150px; color:blue;">' . (file_exists($geocodefile) ? file_get_contents($geocodefile) : '') . '</textarea>
+					<textarea name="geocode" style="height:150px; color:blue;">' . htmlspecialchars(file_exists($geocodefile) ? file_get_contents($geocodefile) : '', ENT_QUOTES) . '</textarea>
 				</div>
 				
 				<hr>
@@ -777,16 +1071,16 @@ function betterSEO() {
 
 				<div id="fb-div">
 					<p>' . i18n_r('BetterSeo/LANG_Custom_Field_Name') . ': </p>
-					<input type="text" name="fbcustom" value="' . (file_exists($fbcustomfile) ? file_get_contents($fbcustomfile) : '') . '" style="width:100%; padding:10px; box-sizing:border-box; color:blue;" placeholder="my-customField">
+					<input type="text" name="fbcustom" value="' . htmlspecialchars(file_exists($fbcustomfile) ? file_get_contents($fbcustomfile) : '', ENT_QUOTES) . '" style="width:100%; padding:10px; box-sizing:border-box; color:blue;" placeholder="my-customField">
 					
 					<br>
 
 					<p>' . i18n_r('BetterSeo/LANG_MultiField_Name') . ': </p>
-					<input type="text" name="multifieldcustom" value="' . (file_exists($multifieldfile) ? file_get_contents($multifieldfile) : '') . '" style="width:100%; padding:10px; box-sizing:border-box; color:blue;" placeholder="my-multiField">
+					<input type="text" name="multifieldcustom" value="' . htmlspecialchars(file_exists($multifieldfile) ? file_get_contents($multifieldfile) : '', ENT_QUOTES) . '" style="width:100%; padding:10px; box-sizing:border-box; color:blue;" placeholder="my-multiField">
 				 
 					
 					<p>' . i18n_r('BetterSeo/LANG_Static_Image') . ':</p>
-					<input type="text" style="width:100%; padding:10px; box-sizing:border-box; color:blue" name="fbimage" value="' . (file_exists($fbimagefile) ? file_get_contents($fbimagefile) : '') . '" placeholder="Image URL">
+					<input type="text" style="width:100%; padding:10px; box-sizing:border-box; color:blue" name="fbimage" value="' . htmlspecialchars(file_exists($fbimagefile) ? file_get_contents($fbimagefile) : '', ENT_QUOTES) . '" placeholder="Image URL">
 					<button style="background: orangered; color: #fff; border: none; padding: 10px 15px; cursor: pointer; border-radius: 7px; width: 20%; margin-top: 20px;" onclick="event.preventDefault();window.open(`' . $SITEURL . 'plugins/BetterSeo/files/imagebrowser.php?&func=multifield[]&count=0`,`myWindow`,`tolbar=no,scrollbars=no,menubar=no,width=500,height=500`)">' . i18n_r('BetterSeo/LANG_Select_Photo') . '</button>
 				</div>
 
@@ -804,7 +1098,7 @@ function betterSEO() {
 				
 				<div id="twitter-div">
 					<p>' . i18n_r('BetterSeo/LANG_Twitter_Username') . ':</p>
-					<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="twitter" placeholder="@YourTwitterUsername" value="' . (file_exists($twitterfile) ? file_get_contents($twitterfile) : '') . '">
+					<input type="text" style="width:100%;padding:10px;box-sizing:border-box;" name="twitter" placeholder="@YourTwitterUsername" value="' . htmlspecialchars(file_exists($twitterfile) ? file_get_contents($twitterfile) : '', ENT_QUOTES) . '">
 				</div>
 
 				<hr>
@@ -1142,11 +1436,28 @@ function betterSEO() {
 				<li><a href="https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/abouts-cards" target="_blank">Twitter/X Cards</a></li>
 				<li><a href="https://www.geo-tag.de/generator/en.html" target="_blank">GeoLocation Generator</a></li>
 				<li><a href="https://www.favicon-generator.org/" target="_blank">Favicon Generator</a></li>
+				<li><a href="https://search.google.com/search-console/about" target="_blank">Google Search Console</a></li>
+				<li><a href="https://www.bing.com/webmasters" target="_blank">Bing Webmaster Tools</a></li>
+				<li><a href="https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag" target="_blank">Robots Meta Tag Reference</a></li>
+				<li><a href="https://schema.org/Article" target="_blank">Schema.org: Article</a></li>
+				<li><a href="https://search.google.com/test/rich-results" target="_blank">Google Rich Results Test</a></li>
 			</ul>
 			
 			<hr>
 			
-			<h4 class="w3-margin-top w3-margin-bottom">' . i18n_r('BetterSeo/LANG_Whats_New') . ':</h4>
+			<h4 class="w3-margin-top w3-margin-bottom">' . i18n_r('BetterSeo/LANG_Whats_New') . ':</h4><br>
+			<p>
+				<b>v4.0</b>
+				<ul>
+				<li>Added per-page SEO controls on the Edit Page screen: hide from search engines (noindex) and don\'t follow links (nofollow)</li>
+				<li>og:type / DC.Type and Article schema (JSON-LD) are now automatic: website on the homepage, article on every other page</li>
+				<li>Added Google Search Console / Bing Webmaster Tools site verification meta tags</li>
+				<li>Added a live Search Result Preview on the Edit Page screen (title, URL, description, and OG image), with automatic fallback to your page content when no meta description is set</li>
+				<li>Security hardening: escaped stored settings output, added CSRF protection to settings form, fixed Apache 2.4 .htaccess syntax</li>
+				<li>Fixed Twitter Card image tag (was incorrectly overwriting twitter:card instead of setting twitter:image)<br>
+				<li>Fixed fatal error on repeated get_seoheader() calls in the same request</li>
+				</ul>
+			</p>
 			<p>
 				<b>v3.9</b><br>
 				added optional username for Twitter Card
@@ -1389,14 +1700,31 @@ function betterSEO() {
 
 	///
 	if (isset($_POST['submit'])) {
+		// CSRF check - confirmed signature: check_nonce($nonce, $action, $file="")
+		if (empty($_POST['nonce']) || !check_nonce($_POST['nonce'], 'save', '')) {
+			die('CSRF detected!');
+		}
+
 		// Create folder if it doesn't exist
 		if (!file_exists($folder)) {
 			mkdir($folder, 0755, true);
+		}
+		// Protect the settings folder from direct HTTP access
+		$betterseo_htaccess = $folder . '.htaccess';
+		if (!file_exists($betterseo_htaccess)) {
+			file_put_contents($betterseo_htaccess, "Require all denied\n");
 		}
 
 		// Homepage title
 		$homepagetitle = $_POST['homepagetitle'] ?? 'normal';
 		file_put_contents($homepagetitlefile, $homepagetitle);
+
+		// Search engine verification codes
+		$googleverify = trim($_POST['googleverify'] ?? '');
+		file_put_contents($googleverifyfile, $googleverify);
+
+		$bingverify = trim($_POST['bingverify'] ?? '');
+		file_put_contents($bingverifyfile, $bingverify);
 
 		// Favicon
 		$favicon = isset($_POST['favicon']) ? 'on' : '';
