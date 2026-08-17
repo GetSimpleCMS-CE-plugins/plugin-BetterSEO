@@ -10,7 +10,7 @@ i18n_merge('BetterSeo') || i18n_merge('BetterSeo', 'en_US');
 register_plugin(
 	$thisfile, 		//Plugin id
 	i18n_r('BetterSeo/LANG_Title'),	//Plugin name
-	'4.0', 			//Plugin version
+	'4.1', 			//Plugin version
 	'CE Team', 		//Plugin author
 	'https://getsimple-ce.ovh/donate', //author website
 	i18n_r('BetterSeo/LANG_Description'), //Plugin description
@@ -131,9 +131,49 @@ if (!function_exists('BetterSeo_edit_panel')) {
 		$folder = GSDATAOTHERPATH . 'betterSEO/';
 		$betterseo_facebookcheckfile = $folder . 'facebookcheck.txt';
 		$betterseo_fbimagefile = $folder . 'fbimage.txt';
-		if (file_exists($betterseo_facebookcheckfile) && file_get_contents($betterseo_facebookcheckfile) !== ''
-			&& file_exists($betterseo_fbimagefile) && file_get_contents($betterseo_fbimagefile) !== '') {
-			$betterseo_preview_image = file_get_contents($betterseo_fbimagefile);
+		$betterseo_multifieldfile = $folder . 'fbmultifield.txt';
+		$betterseo_fbcustomfile = $folder . 'fbcustom.txt';
+		
+		if (file_exists($betterseo_facebookcheckfile) && file_get_contents($betterseo_facebookcheckfile) !== '') {
+			// First priority: Static image
+			if (file_exists($betterseo_fbimagefile) && file_get_contents($betterseo_fbimagefile) !== '') {
+				$betterseo_preview_image = file_get_contents($betterseo_fbimagefile);
+			}
+			// Second priority: Multifield
+			elseif (file_exists($betterseo_multifieldfile) && file_get_contents($betterseo_multifieldfile) !== '') {
+				$fieldName = file_get_contents($betterseo_multifieldfile);
+				// Read the multifield file directly since r_multiFields needs return_page_slug()
+				$multiFieldFile = GSDATAOTHERPATH . 'multiField/' . $slug . '.json';
+				if (file_exists($multiFieldFile)) {
+					$multiFieldData = json_decode(file_get_contents($multiFieldFile), true);
+					if (is_array($multiFieldData)) {
+						foreach ($multiFieldData as $key => $value) {
+							if (isset($value['label']) && $value['label'] == $fieldName) {
+								$imageseo_raw = html_entity_decode($value['value'], ENT_QUOTES, 'UTF-8');
+								// Extract URL from the returned content
+								if (filter_var($imageseo_raw, FILTER_VALIDATE_URL)) {
+									$betterseo_preview_image = $imageseo_raw;
+								} elseif (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $imageseo_raw, $matches)) {
+									$betterseo_preview_image = $matches[1];
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+			// Third priority: Custom field
+			elseif (file_exists($betterseo_fbcustomfile) && file_get_contents($betterseo_fbcustomfile) !== '') {
+				$fieldName = file_get_contents($betterseo_fbcustomfile);
+				if (function_exists('return_custom_field')) {
+					$imageseo_raw = return_custom_field($fieldName);
+					if (filter_var($imageseo_raw, FILTER_VALIDATE_URL)) {
+						$betterseo_preview_image = $imageseo_raw;
+					} elseif (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $imageseo_raw, $matches)) {
+						$betterseo_preview_image = $matches[1];
+					}
+				}
+			}
 		}
 		?>
 		
@@ -156,7 +196,7 @@ if (!function_exists('BetterSeo_edit_panel')) {
 		</div>
 
 		<div class="clear"></div>
-		<div style="width:100%;box-sizing:border-box;padding-top:10px;">
+		<div style="width:100%;box-sizing:border-box;padding:10px 0 20px;">
 			<details class="bseo-serp-details">
 				<summary style="cursor:pointer;font-weight:bold;padding:8px 0;"><?php echo i18n_r('BetterSeo/LANG_Serp_Preview'); ?></summary>
 				<div id="bseo-serp-preview" style="border:1px solid #ddd;border-radius:8px;padding:15px 20px;margin:10px 0;background:#fff;font-family:arial,sans-serif;max-width:600px;">
@@ -164,7 +204,7 @@ if (!function_exists('BetterSeo_edit_panel')) {
 					<div id="bseo-serp-title" style="color:#1a0dab;font-size:20px;line-height:1.3;margin:2px 0;overflow-wrap:break-word;"></div>
 					<div style="display:flex;gap:12px;align-items:flex-start;">
 						<div id="bseo-serp-desc" style="color:#4d5156;font-size:14px;line-height:1.4;overflow-wrap:break-word;flex:1;"></div>
-						<img id="bseo-serp-image" style="display:none;width:80px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;" alt="" />
+						<img id="bseo-serp-image" style="display:none;width:120px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;" alt="" />
 					</div>
 				</div>
 			</details>
@@ -366,7 +406,7 @@ function get_seoheader($full = true) {
 
 		if (file_exists($multifieldfile) && file_get_contents($multifieldfile) !== '') {
 			$content = file_get_contents($multifieldfile);
-			$imageseo = r_multifields($content);
+			$imageseo = r_multiFields($content);
 		}
 
 		if (file_exists($fbcustomfile) && file_get_contents($fbcustomfile) !== '') {
