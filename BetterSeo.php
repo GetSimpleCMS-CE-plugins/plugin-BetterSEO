@@ -10,7 +10,7 @@ i18n_merge('BetterSeo') || i18n_merge('BetterSeo', 'en_US');
 register_plugin(
 	$thisfile, 		//Plugin id
 	i18n_r('BetterSeo/LANG_Title'),	//Plugin name
-	'4.1', 			//Plugin version
+	'4.2', 			//Plugin version
 	'CE Team', 		//Plugin author
 	'https://getsimple-ce.ovh/donate', //author website
 	i18n_r('BetterSeo/LANG_Description'), //Plugin description
@@ -262,7 +262,7 @@ if (!function_exists('BetterSeo_edit_panel')) {
 	}
 }
 
-// Persists the checkboxes above (hooked to 'changedata-save', in changedata.php
+// Persists the checkboxes above (hooked to 'changedata-save', in changedata.php)
 if (!function_exists('BetterSeo_save_page_meta')) {
 	function BetterSeo_save_page_meta() {
 		global $url, $existingurl;
@@ -397,23 +397,27 @@ function get_seoheader($full = true) {
 	';
 	}
 
-	if (file_exists($facebookcheckfile) && file_get_contents($facebookcheckfile) !== '') {
-		$imageseo = '';
-
+	// Resolve Open Graph & Twitter Image
+	$imageseo = '';
+	if (function_exists('nc_get_current_featured_image') && nc_get_current_featured_image() !== '') {
+		$imageseo = nc_get_current_featured_image();
+	} elseif (file_exists($facebookcheckfile) && file_get_contents($facebookcheckfile) !== '') {
 		if (file_exists($fbimagefile) && file_get_contents($fbimagefile) !== '') {
 			$imageseo = file_get_contents($fbimagefile);
 		}
 
-		if (file_exists($multifieldfile) && file_get_contents($multifieldfile) !== '') {
+		if (empty($imageseo) && file_exists($multifieldfile) && file_get_contents($multifieldfile) !== '') {
 			$content = file_get_contents($multifieldfile);
 			$imageseo = r_multiFields($content);
 		}
 
-		if (file_exists($fbcustomfile) && file_get_contents($fbcustomfile) !== '') {
+		if (empty($imageseo) && file_exists($fbcustomfile) && file_get_contents($fbcustomfile) !== '') {
 			$content = file_get_contents($fbcustomfile);
 			$imageseo = return_custom_field($content);
 		}
+	}
 
+	if (file_exists($facebookcheckfile) && file_get_contents($facebookcheckfile) !== '') {
 		$seo .= '	<!-- Facebook Open Graph protocol
 		=================================================== -->
 		<meta property="og:type" content="' . $betterseo_content_type . '">
@@ -437,7 +441,6 @@ function get_seoheader($full = true) {
 		=================================================== -->
 		<meta name="twitter:card" content="summary_large_image">';
 		
-		//if (!empty($twitterfile)) {
 		if (file_exists($twitterfile) && file_get_contents($twitterfile) !== '') {
 			$seo .= '
 		<meta name="twitter:site" content="' . htmlspecialchars(file_exists($twitterfile) ? file_get_contents($twitterfile) : '', ENT_QUOTES) . '" />';
@@ -525,158 +528,152 @@ $seo .= '
 		
 		// Only output if we have valid data
 		if (!empty($jsonldData) && is_array($jsonldData)) {
-		// Start building the JSON-LD output
 			$jsonldOutput = '
 {
   "@context": "https://schema.org",
   "@type": "' . betterseo_json_str($jsonldData['@type']) . '"';
 
-		// Add name property
-		if (isset($jsonldData['name'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['name'])) {
+				$jsonldOutput .= ',
   "name": "' . betterseo_json_str($jsonldData['name']) . '"';
-}
+			}
 
-$jsonldOutput .= ',
+			$jsonldOutput .= ',
   "url": "' . betterseo_json_str(get_page_url(true)) . '",
   "description": "' . betterseo_json_str(descJSON()) . '"';
 		
-		// Add image if available
-		if (!empty($imageseo)) {
-			$jsonldOutput .= ',
+			// Add image if available
+			if (!empty($imageseo)) {
+				$jsonldOutput .= ',
   "image": "' . betterseo_json_str($imageseo) . '"';
-		}
+			}
 		
-		if (isset($jsonldData['telephone'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['telephone'])) {
+				$jsonldOutput .= ',
   "telephone": "' . betterseo_json_str($jsonldData['telephone']) . '"';
-		}
+			}
 		
-		// Handle additional person properties
-		if (isset($jsonldData['gender'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['gender'])) {
+				$jsonldOutput .= ',
   "gender": "' . betterseo_json_str($jsonldData['gender']) . '"';
-		}
+			}
 		
-		if (isset($jsonldData['nationality'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['nationality'])) {
+				$jsonldOutput .= ',
   "nationality": "' . betterseo_json_str($jsonldData['nationality']) . '"';
-		}
+			}
 		
-		if (isset($jsonldData['birthPlace'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['birthPlace'])) {
+				$jsonldOutput .= ',
   "birthPlace": "' . betterseo_json_str($jsonldData['birthPlace']) . '"';
-		}
+			}
 		
-		if (isset($jsonldData['birthDate'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['birthDate'])) {
+				$jsonldOutput .= ',
   "birthDate": "' . betterseo_json_str($jsonldData['birthDate']) . '"';
-		}
+			}
 		
-		if (isset($jsonldData['jobTitle'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['jobTitle'])) {
+				$jsonldOutput .= ',
   "jobTitle": "' . betterseo_json_str($jsonldData['jobTitle']) . '"';
-		}
+			}
 		
-		if (isset($jsonldData['alumniOf'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['alumniOf'])) {
+				$jsonldOutput .= ',
   "alumniOf": "' . betterseo_json_str($jsonldData['alumniOf']) . '"';
-		}
+			}
 		
-		// Handle address
-		if (isset($jsonldData['address']) && is_array($jsonldData['address'])) {
-			$jsonldOutput .= ',
+			// Address
+			if (isset($jsonldData['address']) && is_array($jsonldData['address'])) {
+				$jsonldOutput .= ',
   "address": {
 	"@type": "PostalAddress"';
 			
-			if (isset($jsonldData['address']['streetAddress'])) {
-				$jsonldOutput .= ',
+				if (isset($jsonldData['address']['streetAddress'])) {
+					$jsonldOutput .= ',
 	"streetAddress": "' . betterseo_json_str($jsonldData['address']['streetAddress']) . '"';
-			}
+				}
 			
-			if (isset($jsonldData['address']['addressLocality'])) {
-				$jsonldOutput .= ',
+				if (isset($jsonldData['address']['addressLocality'])) {
+					$jsonldOutput .= ',
 	"addressLocality": "' . betterseo_json_str($jsonldData['address']['addressLocality']) . '"';
-			}
+				}
 			
-			if (isset($jsonldData['address']['addressRegion'])) {
-				$jsonldOutput .= ',
+				if (isset($jsonldData['address']['addressRegion'])) {
+					$jsonldOutput .= ',
 	"addressRegion": "' . betterseo_json_str($jsonldData['address']['addressRegion']) . '"';
-			}
+				}
 			
-			if (isset($jsonldData['address']['postalCode'])) {
-				$jsonldOutput .= ',
+				if (isset($jsonldData['address']['postalCode'])) {
+					$jsonldOutput .= ',
 	"postalCode": "' . betterseo_json_str($jsonldData['address']['postalCode']) . '"';
-			}
+				}
 			
-			if (isset($jsonldData['address']['addressCountry'])) {
-				$jsonldOutput .= ',
+				if (isset($jsonldData['address']['addressCountry'])) {
+					$jsonldOutput .= ',
 	"addressCountry": "' . betterseo_json_str($jsonldData['address']['addressCountry']) . '"';
-			}
+				}
 			
-			$jsonldOutput .= '
+				$jsonldOutput .= '
   }';
-		}
+			}
 		
-		// Handle geo coordinates
-		if (isset($jsonldData['geo']) && is_array($jsonldData['geo'])) {
-			$jsonldOutput .= ',
+			// Geo coordinates
+			if (isset($jsonldData['geo']) && is_array($jsonldData['geo'])) {
+				$jsonldOutput .= ',
   "geo": {
 	"@type": "GeoCoordinates"';
 			
-			if (isset($jsonldData['geo']['latitude'])) {
-				$jsonldOutput .= ',
+				if (isset($jsonldData['geo']['latitude'])) {
+					$jsonldOutput .= ',
 	"latitude": "' . betterseo_json_str($jsonldData['geo']['latitude']) . '"';
-			}
+				}
 			
-			if (isset($jsonldData['geo']['longitude'])) {
-				$jsonldOutput .= ',
+				if (isset($jsonldData['geo']['longitude'])) {
+					$jsonldOutput .= ',
 	"longitude": "' . betterseo_json_str($jsonldData['geo']['longitude']) . '"';
-			}
+				}
 			
-			$jsonldOutput .= '
+				$jsonldOutput .= '
   }';
-		}
+			}
 		
-		// Handle additional properties
-		if (isset($jsonldData['hasMap'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['hasMap'])) {
+				$jsonldOutput .= ',
   "hasMap": "' . betterseo_json_str($jsonldData['hasMap']) . '"';
-		}
+			}
 		
-		if (isset($jsonldData['priceRange'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['priceRange'])) {
+				$jsonldOutput .= ',
   "priceRange": "' . betterseo_json_str($jsonldData['priceRange']) . '"';
-		}
+			}
 		
-		// Handle opening hours specification
-		if (isset($jsonldData['openingHoursSpecification']) && is_array($jsonldData['openingHoursSpecification'])) {
-			$jsonldOutput .= ',
+			if (isset($jsonldData['openingHoursSpecification']) && is_array($jsonldData['openingHoursSpecification'])) {
+				$jsonldOutput .= ',
   "openingHoursSpecification": [';
 			
-			$specCount = count($jsonldData['openingHoursSpecification']);
-			foreach ($jsonldData['openingHoursSpecification'] as $index => $spec) {
-				$jsonldOutput .= '
+				$specCount = count($jsonldData['openingHoursSpecification']);
+				foreach ($jsonldData['openingHoursSpecification'] as $index => $spec) {
+					$jsonldOutput .= '
 	{
 	  "@type": "OpeningHoursSpecification",
 	  "dayOfWeek": ["' . betterseo_json_str($spec['dayOfWeek'][0]) . '"],
 	  "opens": "' . betterseo_json_str($spec['opens']) . '",
 	  "closes": "' . betterseo_json_str($spec['closes']) . '"
 	}';
-				if ($index < $specCount - 1) {
-					$jsonldOutput .= ',';
+					if ($index < $specCount - 1) {
+						$jsonldOutput .= ',';
+					}
 				}
-			}
 			
-			$jsonldOutput .= '
+				$jsonldOutput .= '
   ]';
-		}
+			}
 		
-		// Close the JSON object
-		$jsonldOutput .= '
+			$jsonldOutput .= '
 }';
 		
-		$seo .= '	<!-- JSON-LD Schema -->
+			$seo .= '	<!-- JSON-LD Schema -->
 <script type="application/ld+json">' . $jsonldOutput . '
 </script>
 
@@ -684,8 +681,7 @@ $jsonldOutput .= ',
 		}
 	}
 
-	// Per-page Article schema (separate from the sitewide LocalBusiness/Organization/
-	// Person schema above - a page can have both, multiple JSON-LD blocks are valid)
+	// Per-page Article schema
 	if ($betterseo_content_type === 'article') {
 		$betterseo_pageslug = return_page_slug();
 		$betterseo_pagexml_path = GSDATAPAGESPATH . $betterseo_pageslug . '.xml';
@@ -1954,7 +1950,6 @@ function betterSEO() {
 		file_put_contents($jsonldcodefile, json_encode($jsonldData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
 		// Redirect to avoid form resubmission
-		//echo '<script>window.location.href = window.location.href;</script>';
 		redirect('load.php?id=BetterSeo');
 	}
 }
