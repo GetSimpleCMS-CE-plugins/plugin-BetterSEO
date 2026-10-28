@@ -399,7 +399,9 @@ function get_seoheader($full = true) {
 
 	// Resolve Open Graph & Twitter Image
 	$imageseo = '';
-	if (function_exists('nc_get_current_featured_image') && nc_get_current_featured_image() !== '') {
+	if (function_exists('nc_get_current_seo_image') && nc_get_current_seo_image() !== '') {
+		$imageseo = nc_get_current_seo_image();
+	} elseif (function_exists('nc_get_current_featured_image') && nc_get_current_featured_image() !== '') {
 		$imageseo = nc_get_current_featured_image();
 	} elseif (file_exists($facebookcheckfile) && file_get_contents($facebookcheckfile) !== '') {
 		if (file_exists($fbimagefile) && file_get_contents($fbimagefile) !== '') {
