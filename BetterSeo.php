@@ -1473,7 +1473,7 @@ function betterSEO() {
 				<li><a href="https://developers.facebook.com/docs/sharing/webmasters/" target="_blank">Facebook Open Graph</a></li>
 				<li><a href="https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/abouts-cards" target="_blank">Twitter/X Cards</a></li>
 				<li><a href="https://www.geo-tag.de/generator/en.html" target="_blank">GeoLocation Generator</a></li>
-				<li><a href="https://www.favicon-generator.org/" target="_blank">Favicon Generator</a></li>
+				<li><a href="https://getsimple-ce.ovh/favicon_generator_suite/" target="_blank">Favicon Generator</a></li>
 				<li><a href="https://search.google.com/search-console/about" target="_blank">Google Search Console</a></li>
 				<li><a href="https://www.bing.com/webmasters" target="_blank">Bing Webmaster Tools</a></li>
 				<li><a href="https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag" target="_blank">Robots Meta Tag Reference</a></li>
