@@ -15,7 +15,7 @@ $i18n = [
 	'LANG_Only_Website_Name'=>	'Sólo el nombre del sitio',
 	
 	'LANG_Favicons'			=>	'Favicons',
-	'LANG_Favicons_Text'	=>	'Los iconos deben estar en una carpeta llamada "fav" dentro del directorio de tu tema. (Generador <a href="https://www.favicon-generator.org/" target="_blank">aquí</a>.)',
+	'LANG_Favicons_Text'	=>	'Los iconos deben estar en una carpeta llamada "fav" dentro del directorio de tu tema. (Generador <a href="https://getsimple-ce.ovh/favicon_generator_suite/" target="_blank">aquí</a>.)',
 	
 	'LANG_DublinCore'		=>	'Dublin Core',
 	'LANG_DublinCore_Text'	=>	'Conjunto de metadatos',

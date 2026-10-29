@@ -15,7 +15,7 @@ $i18n = [
 	'LANG_Only_Website_Name'=>	'Only Website Name',
 	
 	'LANG_Favicons'			=>	'Favicons',
-	'LANG_Favicons_Text'	=>	'Icons need to be included in a folder named "fav" within your themes dir. (Visit generator <a href="https://www.favicon-generator.org/" target="_blank">here</a>.)',
+	'LANG_Favicons_Text'	=>	'Icons need to be included in a folder named "fav" within your themes dir. (Visit generator <a href="https://getsimple-ce.ovh/favicon_generator_suite/" target="_blank">here</a>.)',
 	
 	'LANG_DublinCore'		=>	'Dublin Core',
 	'LANG_DublinCore_Text'	=>	'Metadata Element Set',
